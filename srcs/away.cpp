@@ -9,5 +9,5 @@ void	IRC::away(std::vector<std::string> cmd, int cs) {
         message = strjoin(cmd, " ", 1, cmd.size());
     if (message.front() == ':')
 		message.erase(0,1);
-    this->fds[cs].set_away(message);
+    this->fds[cs].setAway(message);
 }

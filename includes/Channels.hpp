@@ -29,8 +29,8 @@ class Channels {
 		std::vector<int>	get_list_moder(void);
 		std::vector<int>	get_list_not_moder(void);
 		std::string			get_name_channel(void);
-		std::string			get_password(void);
-		void				set_password(std::string password);
+		std::string			getPassword(void);
+		void				setPassword(std::string password);
 		void				set_name_channel(std::string name_chat);
 		int					leaving_particimant(int cs);
 		void				set_topic(std::string topic);

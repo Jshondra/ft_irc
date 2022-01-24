@@ -15,17 +15,22 @@
 
 class Client {
 	private:
-		int			type;
+	// int type
+		int			fd_value;
 		void		(*fct_read)(class IRC *irc, int s);
 		void		(*fct_write)(class IRC *irc, int s);
 		char		buf_read[BUF_SIZE + 1];
 		char		buf_write[BUF_SIZE + 1];
 		time_t		reg_time;
-		std::string	nick;
-		std::string	user;
-		std::string	pass;
+		// std::string	nick;
+		std::string	nickname;
+		// std::string	user;
+		std::string	username;
+		// std::string	password;
+		std::string	password;
 		std::string	realname;
-		std::string away_mes;
+		// std::string away_mes;
+		std::string away_message;
 		std::vector<std::string> channels;
 		bool		auth;
 
@@ -36,36 +41,36 @@ class Client {
 
 		Client&	operator=(const Client &fd);
 
-		void		ex_read(IRC *irc, int cs);
-		void		ex_write(IRC *irc, int cs);
-		void		clean_client(void);
-		void		clean_buf_read();
-		void		add_channel(std::string name);
-		int			delete_cannel(std::string name);
-		std::string	get_channels_string(void);
+		void		exRead(IRC *irc, int cs);
+		void		exWrite(IRC *irc, int cs);
+		void		cleanClient(void);
+		void		cleanBufRead();
+		void		addChannel(std::string name);
+		int			deleteChannel(std::string name);
+		std::string	getChannelsStr(void);
 
-		char		*get_buf_read(void);
-		char		*get_buf_write(void);
-		int			get_type(void);
-		std::string	get_nick(void);
-		std::string	get_user(void);
-		std::string	get_pass(void);
-		std::string	get_away(void);
-		std::string	get_realname(void);
-		bool		get_auth(void);
-		time_t		get_reg_time(void);
-		std::vector<std::string> get_channels(void);
+		char		*getBufRead(void);
+		char		*getBufWrite(void);
+		int			getFdValue(void);
+		std::string	getNickname(void);
+		std::string	getUsername(void);
+		std::string	getPassword(void);
+		std::string	getAway(void);
+		std::string	getRealname(void);
+		bool		getAuth(void);
+		time_t		getRegTime(void);
+		std::vector<std::string> getChannels(void);
 		
-		void		set_user(std::string user);
-		void		set_pass(std::string pass);
-		void		set_realname(std::string pass);
-		void		set_type(int);
-		void		set_auth(bool auth);
-		void		set_nick(std::string name);
-		void		set_away(std::string message);
-		void		set_fct_read(void (*fct_read)(IRC *irc, int s));
-		void		set_fct_write(void (*fct_write)(IRC *irc, int s));
-		void		set_retg_time(time_t reg);
+		void		setUsername(std::string username);
+		void		setPassword(std::string password);
+		void		setRealname(std::string realname);
+		void		setFdValue(int);
+		void		setAuth(bool auth);
+		void		setNickname(std::string name);
+		void		setAway(std::string message);
+		void		setFctRead(void (*fct_read)(IRC *irc, int s));
+		void		setFctWrite(void (*fct_write)(IRC *irc, int s));
+		void		setRegTime(time_t reg);
 };
 
 #endif

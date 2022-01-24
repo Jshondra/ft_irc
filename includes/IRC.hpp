@@ -85,7 +85,7 @@ class IRC {
 		char	*get_write_buf(int cs);
 		int		get_maxfd();
 		int		get_fd(const std::string& nick);
-		int		get_type_client(int cs);
+		int		getFdValue_client(int cs);
 		
 		// сmd
 		void	nick(std::vector<std::string> cmd, int cs);

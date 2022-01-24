@@ -6,7 +6,7 @@ void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::st
 	std::string message;
 	std::string away_message;
 
-	if (!this->fds[client_fd].get_auth())
+	if (!this->fds[client_fd].getAuth())
 	{
 		answer_server(cs, 401, sender, recipient);
 		return ;
@@ -15,7 +15,7 @@ void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::st
 	// if (cmd.size() > 3 && (int)cmd[2].c_str()[1] == 1)
 	// 	accept_file(cmd);
 	//send_fule_end
-	away_message = this->fds[client_fd].get_away();
+	away_message = this->fds[client_fd].getAway();
 	message = strjoin(cmd, " ", 2, cmd.size());
 	answer = ":" + sender + " " + cmd.front() + " " + recipient + " :" + message + '\n';
 	answer_to_client(client_fd, (char *)answer.c_str());
@@ -31,7 +31,7 @@ void IRC::send_channels(std::vector<std::string> cmd, int client_fd, int cs, std
 	std::string message;
 
 	message = strjoin(cmd, " ", 2, cmd.size());
-	answer = ":" + sender + "!" + this->fds[cs].get_user() + "@" + this->host + " PRIVMSG " + recipient + " :" +
+	answer = ":" + sender + "!" + this->fds[cs].getUsername() + "@" + this->host + " PRIVMSG " + recipient + " :" +
 			message + '\n';
 	std::vector<int> users = this->channels[client_fd].get_users();
 	for (size_t i = 0; i < users.size(); ++i)
@@ -45,7 +45,7 @@ void	IRC::privmsg_notice(std::vector<std::string> cmd, int cs)
 	std::string sender;
 	std::string	recipient;
 
-	sender = this->fds[cs].get_nick();
+	sender = this->fds[cs].getNickname();
 	if (cmd.size() < 3)
 	{
 		answer_server(cs, 412, sender, "");

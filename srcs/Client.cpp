@@ -1,7 +1,7 @@
 #include "../includes/Client.hpp"
 
 Client::Client(void) {
-	clean_client();
+	cleanClient();
 }
 
 Client::Client(const Client &fd) {
@@ -13,107 +13,107 @@ Client::~Client(void) {
 
 Client&	Client::operator=(const Client &fd) {
 	if (this != &fd){
-		type = fd.type;
+		fd_value = fd.fd_value;
 		fct_read = fd.fct_read;
 		fct_write = fd.fct_write;
 	}
 	return (*this);
 }
 
-void	Client::clean_client(void) {
-	this->type = FD_FREE;
+void	Client::cleanClient(void) {
+	this->fd_value = FD_FREE;
 	this->fct_read = NULL;
 	this->fct_write = NULL;
-	this->pass = "";
-	this->nick = "";
-	this->user = "";
+	this->password = "";
+	this->nickname = "";
+	this->username = "";
 	this->auth = false;
-	this->away_mes = "";
+	this->away_message = "";
 	for (size_t i = 0; i < this->channels.size(); i++) {
 		this->channels.pop_back();
 	}
 }
 
-void	Client::set_type(int type) {
-	this->type = type;
+void	Client::setFdValue(int fd_value) {
+	this->fd_value = fd_value;
 }
 
-void	Client::set_fct_read(void (*fct_read)(IRC *irc, int s)) {
+void	Client::setFctRead(void (*fct_read)(IRC *irc, int s)) {
 	this->fct_read = fct_read;
 }
 
-void	Client::set_fct_write(void (*fct_write)(IRC *irc, int s)) {
+void	Client::setFctWrite(void (*fct_write)(IRC *irc, int s)) {
 	this->fct_write = fct_write;
 }
 
-void	Client::clean_buf_read() {
+void	Client::cleanBufRead() {
 	bzero(buf_read, BUF_SIZE);
 }
 
-char*	Client::get_buf_read(void) {
+char*	Client::getBufRead(void) {
 	return buf_read;
 }
 
-char*	Client::get_buf_write(void) {
+char*	Client::getBufWrite(void) {
 	return buf_write;
 }
 
-int		Client::get_type(void) {
-	return this->type;
+int		Client::getFdValue(void) {
+	return this->fd_value;
 }
 
-void	Client::ex_read(IRC *irc, int cs) {
+void	Client::exRead(IRC *irc, int cs) {
 	this->fct_read(irc, cs);
 }
-void	Client::ex_write(IRC *irc, int cs) {
+void	Client::exWrite(IRC *irc, int cs) {
 	this->fct_write(irc, cs);
 }
 
-void	Client::set_nick(std::string nick) {
-	this->nick = nick;
+void	Client::setNickname(std::string nickname) {
+	this->nickname = nickname;
 }
 
-std::string	Client::get_nick(void) {
-	return this->nick;
+std::string	Client::getNickname(void) {
+	return this->nickname;
 }
 
-void	Client::set_user(std::string user) {
-	this->user = user;
+void	Client::setUsername(std::string username) {
+	this->username = username;
 }
 
-std::string	Client::get_user(void) {
-	return this->user;
+std::string	Client::getUsername(void) {
+	return this->username;
 }
 
-void Client::set_realname(std::string realname) {
+void Client::setRealname(std::string realname) {
 	this->realname = realname;
 }
 
-std::string	Client::get_realname(void) {
+std::string	Client::getRealname(void) {
 	return this->realname;
 }
 
-void	Client::set_pass(std::string pass) {
-	this->pass = pass;
+void	Client::setPassword(std::string password) {
+	this->password = password;
 }
 
-std::string	Client::get_pass(void) {
-	return this->pass;
+std::string	Client::getPassword(void) {
+	return this->password;
 }
 
-void	Client::set_auth(bool auth) {
+void	Client::setAuth(bool auth) {
 	this->auth = auth;
 }
 
-bool	Client::get_auth(void) {
+bool	Client::getAuth(void) {
 	return this->auth;
 }
 
-void	Client::add_channel(std::string name) {
+void	Client::addChannel(std::string name) {
 	this->channels.push_back(name);
 }
 
-int	Client::delete_cannel(std::string name) {
+int	Client::deleteChannel(std::string name) {
 	for (size_t i = 0; i < this->channels.size(); i++) {
 		if (this->channels[i] == name) {
 			this->channels.erase(this->channels.begin() + i);
@@ -123,11 +123,11 @@ int	Client::delete_cannel(std::string name) {
 	return 1;
 }
 
-std::vector<std::string> Client::get_channels(void){
+std::vector<std::string> Client::getChannels(void){
 	return this->channels;
 }
 
-std::string	Client::get_channels_string(void) {
+std::string	Client::getChannelsStr(void) {
 	std::string ret;
 
 	ret = " :@";
@@ -144,19 +144,19 @@ std::string	Client::get_channels_string(void) {
 	return (ret);
 }
 
-time_t		Client::get_reg_time(void) {
+time_t		Client::getRegTime(void) {
 	return this->reg_time;
 }
 
-void		Client::set_retg_time(time_t reg){ 
+void		Client::setRegTime(time_t reg){ 
 	this->reg_time = reg;
 }
 
-std::string		Client::get_away(void) {
-	return this->away_mes;
+std::string		Client::getAway(void) {
+	return this->away_message;
 }
 
-void		Client::set_away(std::string message) {
-	this->away_mes = message;
+void		Client::setAway(std::string message) {
+	this->away_message = message;
 }
 

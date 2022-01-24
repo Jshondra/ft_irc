@@ -59,8 +59,8 @@ void	IRC::srv_create(void) {
 		exit(104);
 	}
 	fcntl(this->sock, F_SETFL, O_NONBLOCK);
-	this->fds[this->sock].set_type(FD_SERV);
-	this->fds[this->sock].set_fct_read(srv_accept);
+	this->fds[this->sock].setFdValue(FD_SERV);
+	this->fds[this->sock].setFctRead(srv_accept);
 }
 
 void	srv_accept(IRC *irc, int s) {
@@ -79,15 +79,15 @@ void	srv_accept(IRC *irc, int s) {
 }
 
 void	IRC::clean_read_buf(int cs) {
-	fds[cs].clean_buf_read();
+	fds[cs].cleanBufRead();
 }
 
 char*	IRC::get_read_buf(int cs) {
-	return fds[cs].get_buf_read();
+	return fds[cs].getBufRead();
 }
 
 char*	IRC::get_write_buf(int cs) {
-	return fds[cs].get_buf_write();
+	return fds[cs].getBufWrite();
 }
 
 void	client_write(IRC *irc, int cs){
@@ -99,18 +99,18 @@ int		IRC::get_maxfd() {
 	return this->maxfd;
 }
 
-int		IRC::get_type_client(int cs){
-	return this->fds[cs].get_type();
+int		IRC::getFdValue_client(int cs){
+	return this->fds[cs].getFdValue();
 }
 
 void	IRC::add_client(int cs){
-	this->fds[cs].set_type(FD_CLIENT);
-	this->fds[cs].set_fct_read(client_read);
-	this->fds[cs].set_fct_write(client_write);
+	this->fds[cs].setFdValue(FD_CLIENT);
+	this->fds[cs].setFctRead(client_read);
+	this->fds[cs].setFctWrite(client_write);
 }
 
 void	IRC::delete_client(int cs) {
-	this->fds[cs].clean_client();
+	this->fds[cs].cleanClient();
 }
 
 void	IRC::init_fd() {
@@ -121,7 +121,7 @@ void	IRC::init_fd() {
 	FD_ZERO(&this->fd_read);
 	FD_ZERO(&this->fd_write);
 	while (i < this->get_maxfd()){
-		if (this->get_type_client(i) != FD_FREE){
+		if (this->getFdValue_client(i) != FD_FREE){
 			FD_SET(i, &this->fd_read);
 			
 			if (strlen(this->get_write_buf(i)) > 0)
@@ -152,11 +152,11 @@ void	IRC::check_fd() {
 }
 
 void	IRC::client_reading(int i){
-	this->fds[i].ex_read(this, i);
+	this->fds[i].exRead(this, i);
 }
 
 void	IRC::client_writing(int i){
-	this->fds[i].ex_write(this, i);
+	this->fds[i].exWrite(this, i);
 }
 
 void IRC::init_cmds()
@@ -187,20 +187,20 @@ void	IRC::choose_cmd(std::vector<std::string> cmd, int cs)
 	{
 		if (cmd.size() == 1 && cmd.front() != "AWAY" && cmd.front() != "NAMES" && cmd.front() != "QUIT")
 		{
-			answer_server(cs, 461, this->fds[cs].get_nick(), cmd[0]);
+			answer_server(cs, 461, this->fds[cs].getNickname(), cmd[0]);
 			return ;
 		}
-		if (cmd[0] == "NICK" || cmd[0] == "USER" || cmd[0] == "PASS" || cmd[0] == "QUIT" || this->fds[cs].get_auth()) {
+		if (cmd[0] == "NICK" || cmd[0] == "USER" || cmd[0] == "PASS" || cmd[0] == "QUIT" || this->fds[cs].getAuth()) {
 			(this->*(commands[(cmd[0])]))(cmd, cs);
 		}
 		else 
 			answer_server(cs, 451, "", "");
 	}
 	else {
-		if (!this->fds[cs].get_auth())
+		if (!this->fds[cs].getAuth())
 			answer_server(cs, 451, "", "");
 		else
-			answer_server(cs, 421, this->fds[cs].get_nick(), cmd.front());
+			answer_server(cs, 421, this->fds[cs].getNickname(), cmd.front());
 	}
 }
 
@@ -208,7 +208,7 @@ void	IRC::choose_cmd(std::vector<std::string> cmd, int cs)
 int		IRC::get_fd(const std::string& nick) {
 	for (int i = 4; i != this->get_maxfd(); ++i)
 	{
-		if (nick == this->fds[i].get_nick())
+		if (nick == this->fds[i].getNickname())
 			return (i);
 	}
 	return -1;

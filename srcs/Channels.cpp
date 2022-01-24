@@ -91,11 +91,11 @@ void	Channels::set_name_channel(std::string name_chat){
 }
 
 
-std::string			Channels::get_password(void){
+std::string			Channels::getPassword(void){
 	return this->password;
 }
 
-void				Channels::set_password(std::string password){
+void				Channels::setPassword(std::string password){
 	this->password = password;
 }
 
