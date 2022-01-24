@@ -59,7 +59,7 @@ int main(int argc, char **argv){
 	}
 	if (port < 1024 || port > 49151)
 	{
-		std::cout << "Wrong port!" << std::endl;
+		std::cout << "Wrong port!!!" << std::endl;
 		exit (1);
 	}
 	start_server(host, port, pass);
