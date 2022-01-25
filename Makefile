@@ -1,6 +1,6 @@
 NAME		=	ircserv
 
-SRC			=	main	Server	Client	Server_cmd	Channels	\
+SRC			=	main	Server	Client	Channels	\
 				privmsg		req_client	handler	authorization	\
 				resp_serv
 

@@ -102,8 +102,7 @@ class Server {
 		void	ison_cmd(std::vector<std::string> cmd, int mc);
 		void	join_cmd(std::vector<std::string> cmd, int mc);
 		void	ping_cmd(std::vector<std::string> cmd, int mc);
-		
-		
+
 };
 
 void		reader_client(Server *irc, int mc);
