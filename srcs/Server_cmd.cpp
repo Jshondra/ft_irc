@@ -1,27 +1,27 @@
 #include "../includes/Server.hpp"
 
 
-void	Server::ping(std::vector<std::string> cmd, int cs){
+void	Server::ping_cmd(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	std::string pong = "PONG ";
 	std::stringstream t_now;
 
 	t_now << time(0);
 	pong.append(t_now.str() + "\n");
-	server_answering(cs, (char *)pong.c_str());
+	answer_to_client(cs, (char *)pong.c_str());
 }
 
-void	Server::ison(std::vector<std::string> cmd, int cs){
+void	Server::ison_cmd(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	int cs_auth;
 
-	if (!this->fds[cs].get_auth())
+	if (!this->fds[cs].getAuth())
 		answer_server(cs, 451, "", "");
 	else {
-		std::string answer = ":" + this->servername + " 303 " + this->fds[cs].get_nick() + " :";
+		std::string answer = ":" + this->servername + " 303 " + this->fds[cs].getNickname() + " :";
 		for (size_t i = 1; i < cmd.size(); i++) {
 			cs_auth = this->get_fd(cmd[i]);
-			if (cs_auth != -1 && this->fds[cs_auth].get_auth()) {
+			if (cs_auth != -1 && this->fds[cs_auth].getAuth()) {
 				answer.append(cmd[i]);
 				if (i + 1 != cmd.size()) {
 					answer.append(" ");
@@ -29,7 +29,7 @@ void	Server::ison(std::vector<std::string> cmd, int cs){
 			}
 		}
 		answer.append("\n");
-		server_answering(cs, (char *)answer.c_str());
+		answer_to_client(cs, (char *)answer.c_str());
 	}
 }
 
@@ -42,7 +42,7 @@ int	Server::get_fd_channel(std::string name){
 	return -1;
 }
 
-void	Server::join(std::vector<std::string> cmd, int cs){
+void	Server::join_cmd(std::vector<std::string> cmd, int cs){
 	size_t pass;
 	std::string password;
 
@@ -60,18 +60,18 @@ void	Server::join(std::vector<std::string> cmd, int cs){
 	}
 	for (size_t i = 1; i < pass; i++) {
 		password = pass + i - 1 < cmd.size() ? cmd[pass + i - 1] : "";
-		join_channel(cs, cmd[i], password);
+		ch_joiner(cs, cmd[i], password);
 	}
 
 }
 
-void	Server::join_channel(int cs, std::string name, std::string pass){
+void	Server::ch_joiner(int cs, std::string name, std::string pass){
 	int i;
 
 
 	i = get_fd_channel(name);
 	if (i != -1) {
-		if (pass == this->channels[i].get_password()) {
+		if (pass == this->channels[i].getPassword()) {
 			std::vector<int> clients = this->channels[i].get_users();
 			for (size_t j = 0; j < clients.size(); j++) {
 				if (cs == clients[j]) {
@@ -79,12 +79,12 @@ void	Server::join_channel(int cs, std::string name, std::string pass){
 				}
 			}
 			std::cout << "!JOIN! channel found #" << i << " name: " << name <<" whith password " << pass << std::endl;
-			this->fds[cs].add_channel(name);
+			this->fds[cs].addChannel(name);
 			this->channels[i].add_not_moder(cs);
-			after_join(cs, i);
+			after_join_cmd(cs, i);
 		}
 		else {
-			answer_server(cs, 475, this->fds[cs].get_nick(), name);
+			answer_server(cs, 475, this->fds[cs].getNickname(), name);
 		}
 	}
 	else {
@@ -92,10 +92,10 @@ void	Server::join_channel(int cs, std::string name, std::string pass){
 		if (i != -1) {
 			std::cout << "!JOIN! channel created #" << i << " name: " << name  << " whith password " << pass << std::endl;
 			this->channels[i].set_name_channel(name);
-			this->channels[i].set_password(pass);
-			this->fds[cs].add_channel(name);
+			this->channels[i].setPassword(pass);
+			this->fds[cs].addChannel(name);
 			this->channels[i].add_moder(cs);
-			after_join(cs, i);
+			after_join_cmd(cs, i);
 		}
 		else {
 			std::cout << "WRONG not space for Channels!" << std::endl;
@@ -103,42 +103,42 @@ void	Server::join_channel(int cs, std::string name, std::string pass){
 	}
 }
 
-void	Server::after_join(int cs, int chn){
-	std::string mess = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + "@" + this->host + " JOIN :" + this->channels[chn].get_name_channel() + "\n";
+void	Server::after_join_cmd(int cs, int chn){
+	std::string mess = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + "@" + this->host + " JOIN :" + this->channels[chn].get_name_channel() + "\n";
 	std::vector<int> clients = this->channels[chn].get_users();
 	for (size_t i = 0; i < clients.size(); i++) {
-		server_answering(clients[i], (char *)mess.c_str());
+		answer_to_client(clients[i], (char *)mess.c_str());
 	}
-	if (this->channels[chn].get_topic() == "")
-		answer_server(cs, 331, this->fds[cs].get_nick(), this->channels[chn].get_name_channel());
+	if (this->channels[chn].get_topic_cmd() == "")
+		answer_server(cs, 331, this->fds[cs].getNickname(), this->channels[chn].get_name_channel());
 	else {
-		std::string answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " TOPIC " + this->channels[chn].get_name_channel() + " :" + this->channels[chn].get_topic() + "\n";
-		this->server_answering(cs, (char *)answer.c_str());
+		std::string answer = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + this->host + " TOPIC " + this->channels[chn].get_name_channel() + " :" + this->channels[chn].get_topic_cmd() + "\n";
+		this->answer_to_client(cs, (char *)answer.c_str());
 	}
 	
 	join_participants(cs, chn);
-	answer_server(cs, 366, this->fds[cs].get_nick(), this->channels[chn].get_name_channel());
+	answer_server(cs, 366, this->fds[cs].getNickname(), this->channels[chn].get_name_channel());
 }
 
 void	Server::join_participants(int cs, int chn){
-	std::string mess = ":" + this->servername + " 353 " + this->fds[cs].get_nick() + " = " + this->channels[chn].get_name_channel() + " :";
+	std::string mess = ":" + this->servername + " 353 " + this->fds[cs].getNickname() + " = " + this->channels[chn].get_name_channel() + " :";
 	std::vector<int> clients = this->channels[chn].get_list_moder();
 	for (size_t i = 0; i < clients.size(); i++) {
 		mess.append("@");
-		mess.append(this->fds[clients[i]].get_nick());
+		mess.append(this->fds[clients[i]].getNickname());
 		mess.append(" ");
 	}
 	clients = this->channels[chn].get_list_not_moder();
 	for (size_t i = 0; i < clients.size(); i++) {
-		mess.append(this->fds[clients[i]].get_nick());
+		mess.append(this->fds[clients[i]].getNickname());
 		if (i + 1 != clients.size())
 			mess.append(" ");
 	}
 	mess.append("\n");
-	server_answering(cs, (char *)mess.c_str());
+	answer_to_client(cs, (char *)mess.c_str());
 }
 
-void	Server::names(std::vector<std::string> cmd, int cs){
+void	Server::names_cmd(std::vector<std::string> cmd, int cs){
 	std::string answer;
 	int found;
 	int count_found;
@@ -167,73 +167,73 @@ void	Server::names(std::vector<std::string> cmd, int cs){
 		}
 	}
 	if (count_found)
-		answer_server(cs, 366, this->fds[cs].get_nick(), answer);
+		answer_server(cs, 366, this->fds[cs].getNickname(), answer);
 }
 
-void	Server::who(std::vector<std::string> cmd, int cs){
+void	Server::who_cmd(std::vector<std::string> cmd, int cs){
 	(void)cmd;
-	answer_server(cs, 315, this->fds[cs].get_nick(), this->fds[cs].get_nick());
+	answer_server(cs, 315, this->fds[cs].getNickname(), this->fds[cs].getNickname());
 }
 
-void	Server::whois(std::vector<std::string> cmd, int cs){
+void	Server::whois_cmd(std::vector<std::string> cmd, int cs){
 	int cs_auth;
 	std::stringstream t_reg;
 	std::stringstream t_now;
 		
 	cs_auth = this->get_fd(cmd[1]);
-	if (cs_auth != -1 && this->fds[cs_auth].get_auth()) {
+	if (cs_auth != -1 && this->fds[cs_auth].getAuth()) {
 		std::string mess;
-		mess = ":" + this->servername + " 311 " + this->fds[cs].get_nick() + " " + cmd[1] + " " + this->fds[cs_auth].get_user() + " " + this->host + " * :" + this->fds[cs_auth].get_realname() + "\n";
-		server_answering(cs, (char *)mess.c_str());
-		mess = ":" + this->servername + " 319 " + this->fds[cs].get_nick() + " " + cmd[1]  + this->fds[cs_auth].get_channels_string();
-		server_answering(cs, (char *)mess.c_str());
-		answer_server(cs, 312, this->fds[cs].get_nick(), cmd[1]);
+		mess = ":" + this->servername + " 311 " + this->fds[cs].getNickname() + " " + cmd[1] + " " + this->fds[cs_auth].getUsername() + " " + this->host + " * :" + this->fds[cs_auth].getRealname() + "\n";
+		answer_to_client(cs, (char *)mess.c_str());
+		mess = ":" + this->servername + " 319 " + this->fds[cs].getNickname() + " " + cmd[1]  + this->fds[cs_auth].getChannelsStr();
+		answer_to_client(cs, (char *)mess.c_str());
+		answer_server(cs, 312, this->fds[cs].getNickname(), cmd[1]);
 		t_now << time(0);
-		t_reg << time(0) - this->fds[cs].get_reg_time();
-		answer_server(cs, 317, this->fds[cs].get_nick(), cmd[1] + " " + t_reg.str() + " " + t_now.str());
-		answer_server(cs, 318, this->fds[cs].get_nick(), cmd[1]);
+		t_reg << time(0) - this->fds[cs].getRegTime();
+		answer_server(cs, 317, this->fds[cs].getNickname(), cmd[1] + " " + t_reg.str() + " " + t_now.str());
+		answer_server(cs, 318, this->fds[cs].getNickname(), cmd[1]);
 	}
 }
 
-void	Server::part(std::vector<std::string> cmd, int cs){
+void	Server::part_cmd(std::vector<std::string> cmd, int cs){
 	std::string answer;
 	for (size_t i = 1; i < cmd.size(); i++) {
-		answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " PART " + cmd[i] + "\n";
-		server_answering(cs, (char *)answer.c_str());
-		this->part_for_each(cmd[i], cs, answer);
+		answer = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + this->host + " PART " + cmd[i] + "\n";
+		answer_to_client(cs, (char *)answer.c_str());
+		this->selecter_each(cmd[i], cs, answer);
 	}
 }
 
-void	Server::part_for_each(std::string name, int cs, std::string answer){
+void	Server::selecter_each(std::string name, int cs, std::string answer){
 	int fd_chn;
 
 	fd_chn = this->get_fd_channel(name);
 	if (fd_chn != -1) {
-		if (this->fds[cs].delete_cannel(name)){
-			answer_server(cs, 442, this->fds[cs].get_nick(), name);
+		if (this->fds[cs].deleteChannel(name)){
+			answer_server(cs, 442, this->fds[cs].getNickname(), name);
 			return ;
 		}
 		int new_lead = this->channels[fd_chn].leaving_particimant(cs);
 		if (new_lead >= 0){
 			std::vector<int> particimants_list = this->channels[fd_chn].get_users();
 			for (size_t j = 0; j < particimants_list.size(); j++) {
-				server_answering(particimants_list[j], (char *)answer.c_str());
+				answer_to_client(particimants_list[j], (char *)answer.c_str());
 			}
 			if (new_lead != 0) {
-				answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " MODE " + name + " +o " + this->fds[new_lead].get_nick() + "\n";
+				answer = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + this->host + " MODE " + name + " +o " + this->fds[new_lead].getNickname() + "\n";
 				for (size_t j = 0; j < particimants_list.size(); j++) {
-				server_answering(particimants_list[j], (char *)answer.c_str());
+				answer_to_client(particimants_list[j], (char *)answer.c_str());
 				}
 			}
 		}
 	}
 	else {
-		answer_server(cs, 403, this->fds[cs].get_nick(), name);
+		answer_server(cs, 403, this->fds[cs].getNickname(), name);
 	}
 }
 
-void	Server::topic(std::vector<std::string> cmd, int cs) {
-	std::vector<std::string> chn = this->fds[cs].get_channels();
+void	Server::topic_cmd(std::vector<std::string> cmd, int cs) {
+	std::vector<std::string> chn = this->fds[cs].getChannels();
 	size_t i = 0;
 	std::string answer;
 	std::vector<int> moder;
@@ -243,55 +243,55 @@ void	Server::topic(std::vector<std::string> cmd, int cs) {
 			break ;
 	}
 	if (i == chn.size()) {
-		answer_server(cs, 442, this->fds[cs].get_nick(), cmd[1]);
+		answer_server(cs, 442, this->fds[cs].getNickname(), cmd[1]);
 		return ;
 	}
 	int fd = this->get_fd_channel(cmd[1]);
 	if (cmd.size() == 2) {
-		if (this->channels[fd].get_topic() == "") {
-			answer_server(cs, 331, this->fds[cs].get_nick(), cmd[1]);
+		if (this->channels[fd].get_topic_cmd() == "") {
+			answer_server(cs, 331, this->fds[cs].getNickname(), cmd[1]);
 		}
 		else {
-			answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " TOPIC " + cmd[1] + " :" + this->channels[fd].get_topic() + "\n";
-			this->server_answering(cs, (char *)answer.c_str());
+			answer = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + this->host + " TOPIC " + cmd[1] + " :" + this->channels[fd].get_topic_cmd() + "\n";
+			this->answer_to_client(cs, (char *)answer.c_str());
 		}
 		return ;
 	}
 	moder = this->channels[fd].get_list_moder();
 	for (size_t i = 0; i < moder.size(); i++) {
 		if (cs == moder[i]) {
-			answer = strjoin(cmd, " ", 2, cmd.size());
+			answer = strjoin_cmd(cmd, " ", 2, cmd.size());
 			std::cout << answer << std::endl;
-			this->channels[fd].set_topic(answer);
+			this->channels[fd].set_topic_cmd(answer);
 			return ;
 		}
 	}
-	answer_server(cs, 482, this->fds[cs].get_nick(), cmd[1]);
+	answer_server(cs, 482, this->fds[cs].getNickname(), cmd[1]);
 	
 }
 
-void	Server::quit(std::vector<std::string> cmd, int cs) {
+void	Server::quit_cmd(std::vector<std::string> cmd, int cs) {
 	std::string answer;
 	std::vector<std::string> channels;
 
-	answer = ":" + this->fds[cs].get_nick() + " QUIT :";
+	answer = ":" + this->fds[cs].getNickname() + " QUIT :";
 	if (cmd.size() < 2) {
 		answer.append("Leaving.");
 	}
 	else {
-		answer += strjoin(cmd, " ", 1, cmd.size());
+		answer += strjoin_cmd(cmd, " ", 1, cmd.size());
 	}
 	answer.append("\n");
-	channels = this->fds[cs].get_channels(); 
+	channels = this->fds[cs].getChannels(); 
 	for (size_t i = 0; i < channels.size(); i++){
-		this->part_for_each(channels[i], cs, answer);
+		this->selecter_each(channels[i], cs, answer);
 	}
-	delete_client(cs);
+	client_drop(cs);
 	close(cs);
 }
 
-void	Server::accept_file(std::vector<std::string> cmd){
-	std::cout << "accept_file!\n";
+void	Server::file_accepter(std::vector<std::string> cmd){
+	std::cout << "file_accepter!\n";
 	std::string name = "";
 	size_t i = 4;
 	
@@ -300,7 +300,7 @@ void	Server::accept_file(std::vector<std::string> cmd){
 		return ;
 	for (; i  < cmd.size(); i++) {
 		if (cmd[i][cmd[i].length() - 1] == '"') {
-			name = strjoin(cmd, " ", 4, i + 1);
+			name = strjoin_cmd(cmd, " ", 4, i + 1);
 			break ;
 		}
 	}
@@ -309,10 +309,10 @@ void	Server::accept_file(std::vector<std::string> cmd){
 	name.erase(0, 1);
 	name.erase(name.length() - 1, 1);
 	std::cout << "name = " << name << " ip = " << cmd[i + 1] << " port = " << cmd[i + 2] << " size = " << cmd[i + 3] << std::endl;
-	accept_write(name, atoi(cmd[i + 2].c_str()));
+	write_accepter(name, atoi(cmd[i + 2].c_str()));
 }
 
-void	Server::accept_write(std::string name, int port){
+void	Server::write_accepter(std::string name, int port){
 	int			s;
 	struct sockaddr_in	sin;
 
@@ -322,13 +322,13 @@ void	Server::accept_write(std::string name, int port){
 	sin.sin_addr.s_addr = INADDR_ANY;
 	sin.sin_port = htons(port);
 	connect(s, (struct sockaddr*)&sin, sizeof(sin));
-	MyFile << get_text(s);
+	MyFile << getter_clean_txt(s);
 	MyFile.close();
 	close(s);
 }
 
-void	Server::kick(std::vector<std::string> cmd, int cs) {
-	std::vector<std::string> chn = this->fds[cs].get_channels();
+void	Server::kick_cmd(std::vector<std::string> cmd, int cs) {
+	std::vector<std::string> chn = this->fds[cs].getChannels();
 	size_t i = 0;
 	std::string answer;
 	std::vector<int> moder;
@@ -339,11 +339,11 @@ void	Server::kick(std::vector<std::string> cmd, int cs) {
 			break ;
 	}
 	if (i == chn.size()) {
-		answer_server(cs, 442, this->fds[cs].get_nick(), cmd[1]);
+		answer_server(cs, 442, this->fds[cs].getNickname(), cmd[1]);
 		return ;
 	}
 	int fd = this->get_fd_channel(cmd[1]);
-	users = split(cmd[2], ",");
+	users = our_own_split(cmd[2], ",");
 	moder = this->channels[fd].get_list_moder();
 	for (size_t i = 0; i < moder.size(); i++) {
 		if (cs == moder[i]) {
@@ -353,7 +353,7 @@ void	Server::kick(std::vector<std::string> cmd, int cs) {
 			return ;
 		}
 	}
-	answer_server(cs, 482, this->fds[cs].get_nick(), cmd[1]);
+	answer_server(cs, 482, this->fds[cs].getNickname(), cmd[1]);
 	
 }
 
@@ -363,8 +363,8 @@ void Server::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::st
 
 	users = this->channels[fd_chn].get_list_not_moder();
 	for (; i < users.size(); i++) {
-		if (this->fds[users[i]].get_nick() == name) {
-			this->fds[users[i]].delete_cannel(cmd[1]);
+		if (this->fds[users[i]].getNickname() == name) {
+			this->fds[users[i]].deleteChannel(cmd[1]);
 			this->channels[fd_chn].leaving_particimant(users[i]);
 			break ;
 		}
@@ -372,16 +372,16 @@ void Server::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::st
 	if (i == users.size()){
 		return ;
 	}
-	std::string answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + "@" + this->host + " KICK " + cmd[1] + " " + name + " ";
+	std::string answer = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + "@" + this->host + " KICK " + cmd[1] + " " + name + " ";
 	if (cmd.size() < 4)
 		answer.append(":" + name);
 	else
-		answer += strjoin(cmd, " ", 3, cmd.size());
+		answer += strjoin_cmd(cmd, " ", 3, cmd.size());
 	answer.append("\n");
-	server_answering(users[i], (char *)answer.c_str());
+	answer_to_client(users[i], (char *)answer.c_str());
 
 	users = this->channels[fd_chn].get_users();
 	for (size_t i = 0; i < users.size(); i++) {
-		server_answering(users[i], (char *)answer.c_str());
+		answer_to_client(users[i], (char *)answer.c_str());
 	}
 }

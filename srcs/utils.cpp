@@ -1,6 +1,6 @@
 #include "../includes/Server.hpp"
 
-std::string strjoin(std::vector<std::string> vector, const std::string& delim, int start, int end) {
+std::string strjoin_cmd(std::vector<std::string> vector, const std::string& delim, int start, int end) {
 	std::string	result;
 	std::vector<std::string>::iterator ret;
 	
@@ -10,7 +10,7 @@ std::string strjoin(std::vector<std::string> vector, const std::string& delim, i
 	return result;
 }
 
-std::vector<std::string> split(const std::string& str, const std::string& sep)
+std::vector<std::string> our_own_split(const std::string& str, const std::string& sep)
 {
 	std::vector<std::string> commands;
 	std::string found;
