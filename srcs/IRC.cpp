@@ -1,5 +1,14 @@
 #include "../includes/IRC.hpp"
 
+# define OFF_COLOR "\033[0m"
+# define RED "\033[0;31m"
+# define GREEN "\033[0;32m"
+# define YELLOW "\033[0;33"
+# define BLUE "\033[0;34"
+# define VIOLET "\033[0;35"
+# define LBLUE "\033[0;36"
+# define GREY "\033[0;37"
+
 IRC::IRC(std::string host, int port, std::string pass) {
 	maxfd = MAX_CLIENT;
 	fds = new Client[maxfd];
@@ -32,15 +41,13 @@ void	IRC::srv_create(void) {
 	struct sockaddr_in	sin;
 
 	this->sock = socket(PF_INET, SOCK_STREAM, 0);
-	if (this->sock == -1)
-	{
-		std::cout << "Failed to create socket. errno: " << errno << std::endl;
+	if (this->sock == -1) {
+		std::cout << "\033[0;31mFailed to create socket. errno: " << errno << OFF_COLOR << std::endl;
 		exit (errno);
 	}
 	const int trueFlag = 1;
-	if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0)
-	{
-		std::cout << "setsockopt failed" << std::endl;
+	if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0) {
+		std::cout << "\033[0;31msetsockopt failed" << OFF_COLOR << std::endl;
 		exit(errno);
 	}
 	sin.sin_family = AF_INET;
@@ -48,14 +55,12 @@ void	IRC::srv_create(void) {
 	this->hostname = inet_addr((const char *)this->host.c_str());
 	sin.sin_addr.s_addr = this->hostname;
 	sin.sin_port = htons(this->port);
-	if (bind(this->sock, (struct sockaddr*)&sin, sizeof(sin)) == -1)
-	{
-		std::cout << "Failed to bind to port " << port << std::endl;
+	if (bind(this->sock, (struct sockaddr*)&sin, sizeof(sin)) == -1) {
+		std::cout << "\033[0;31mFailed to bind to port " << port << OFF_COLOR << std::endl;
 		exit(errno);
 	}
-	if (listen(this->sock, 21) == -1)
-	{
-		std::cout << "Failed to listen on socket" << std::endl;
+	if (listen(this->sock, 21) == -1) {
+		std::cout << "\033[0;31mFailed to listen on socket \033[0m" << std::endl;
 		exit(104);
 	}
 	fcntl(this->sock, F_SETFL, O_NONBLOCK);
@@ -73,7 +78,7 @@ void	server_accepter(IRC *irc, int s) {
 	if (cs > irc->get_maxfd())
 		close(cs);
 	else {
-		std::cout << "New client " << cs << " from " << inet_ntoa(csin.sin_addr) << ":" << ntohs(csin.sin_port) << std::endl;
+		std::cout << "\033[0;32mNew client " << cs << " from " << inet_ntoa(csin.sin_addr) << ":" << ntohs(csin.sin_port) << " \033[0m" << std::endl;
 		irc->client_adder(cs);
 	}
 }
@@ -230,6 +235,5 @@ bool	IRC::run_checker(bool run) {
 	exit(130);
 }
 
-IRC::IRC() {
-}
+IRC::IRC() {}
  

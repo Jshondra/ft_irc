@@ -11,10 +11,6 @@ void IRC::user_sender(std::vector<std::string> cmd, int client_fd, int cs, std::
 		answer_server(cs, 401, sender, recipient);
 		return ;
 	}
-	//senf_file
-	// if (cmd.size() > 3 && (int)cmd[2].c_str()[1] == 1)
-	// 	file_accepter(cmd);
-	//send_fule_end
 	away_message = this->fds[client_fd].getaway_cmd();
 	message = strjoin_cmd(cmd, " ", 2, cmd.size());
 	answer = ":" + sender + " " + cmd.front() + " " + recipient + " :" + message + '\n';
@@ -33,7 +29,7 @@ void IRC::channel_sender(std::vector<std::string> cmd, int client_fd, int cs, st
 	message = strjoin_cmd(cmd, " ", 2, cmd.size());
 	answer = ":" + sender + "!" + this->fds[cs].getUsername() + "@" + this->host + " PRIVMSG " + recipient + " :" +
 			message + '\n';
-	std::vector<int> users = this->channels[client_fd].get_users();
+	std::vector<int> users = this->channels[client_fd].getClients();
 	for (size_t i = 0; i < users.size(); ++i)
 		if (users[i] != cs)
 			answer_to_client(users[i], (char *) answer.c_str());

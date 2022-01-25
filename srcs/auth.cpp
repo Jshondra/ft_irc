@@ -1,5 +1,14 @@
 #include "../includes/IRC.hpp"
 
+# define OFF_COLOR "\033[0m"
+# define RED "\033[0;31m"
+# define GREEN "\033[0;32m"
+# define YELLOW "\033[0;33"
+# define BLUE "\033[0;34"
+# define VIOLET "\033[0;35"
+# define LBLUE "\033[0;36"
+# define GREY "\033[0;37"
+
 bool IRC::nickname_repl(const std::string& nick) {
 	for (int i = 4; i != this->maxfd; ++i)
 	{
@@ -49,7 +58,7 @@ void	IRC::nickname_changer(std::string nick, int cs){
 	channels = this->fds[cs].getChannels();
 	this->fds[cs].setNickname(nick);
 	for (size_t i = 0; i < channels.size(); i++){
-		chnl_clients = this->channels[this->get_fd_channel(channels[i])].get_users();
+		chnl_clients = this->channels[this->get_fd_channel(channels[i])].getClients();
 		for (size_t j = 0; j < chnl_clients.size(); j++) {
 			if (chnl_clients[j] != cs) {
 				answer_to_client(chnl_clients[j], (char *)answer.c_str());
@@ -89,27 +98,33 @@ void IRC::method(int cs, std::string nick) {
 	std::string message = ":" + this->servername + " 372 " + nick;
 	answer_to_client(cs, (char *)(":" + this->servername + " 375 " + nick + " :- " + this->servername +
 			" Message of the day -\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⣿⣿⣿⠟⠋⠁⠄⠄⠄⠄⠄⠄⠄⠄⠙⢿⣿⣿⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⣿⡟⠁⠄⠄⠄⠄⣠⣤⣴⣶⣶⣶⣶⣤⡀⠈⠙⢿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⡟⠄⠄⠄⠄⠄⣸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣆⠄⠈⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⠁⠄⠄⠄⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠄⠄⢺⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⡄⠄⠄⠄⠙⠻⠿⣿⣿⣿⣿⠿⠿⠛⠛⠻⣿⡄⠄⣾⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⡇⠄⠄⠁ 👁 ⠄⢹⣿⡗⠄ 👁 ⢄⡀⣾⢀⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⡇⠘⠄⠄⠄⢀⡀⠄⣿⣿⣷⣤⣤⣾⣿⣿⣿⣧⢸⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⡇⠄⣰⣿⡿⠟⠃⠄⣿⣿⣿⣿⣿⡛⠿⢿⣿⣷⣾⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⣿⡄⠈⠁⠄⠄⠄⠄⠻⠿⢛⣿⣿⠿⠂⠄⢹⢹⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⣿⣿⡐⠐⠄⠄⣠⣀⣀⣚⣯⣵⣶⠆⣰⠄⠞⣾⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⣿⣿⡐⠐⠄⠄⣠⣀⣀⣚⣯⣵⣶⠆⣰⠄⠞⣾⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⣿⠿⠿⠋⠉⠄⠄⠄⠄⠄⠄⠄⣀⣠⣾⣿⣿⣿⡟⠁⠹⡇⣸⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(message + " :- ⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠙⠿⠿⠛⠋⠄⣸⣦⣠⣿⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(":" + this->servername + " 376 " + nick + " :End of /method command\n").c_str());
+answer_to_client(cs, (char *)(message + ":-                                \n").c_str());
+answer_to_client(cs, (char *)(message + " :-  ▄█████▄              ▄██████▄\n").c_str());
+answer_to_client(cs, (char *)(message + " :- █████████▄           ██████████\n").c_str());
+answer_to_client(cs, (char *)(message + " :- ██████████           ██████████\n").c_str());
+answer_to_client(cs, (char *)(message + " :- ██████████▄▄▄▄▄▄▄▄▄▄▄██████████\n").c_str());
+answer_to_client(cs, (char *)(message + " :- ███████████▀▀▀███▀▀▀███████████\n").c_str());
+answer_to_client(cs, (char *)(message + " :- █████████▀░░░░░▀░░░░░▀█████████\n").c_str());
+answer_to_client(cs, (char *)(message + " :-  ▀██████░░░▄▀▀▄░▄▀▀▄░░░██████▀ \n").c_str());
+answer_to_client(cs, (char *)(message + " :-      ▄██░░░█░▄█░█▄░█░░░██▄     \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     ████░░░█░██░██░█░░░████    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     ████░░░▀▄██▄██▄▀░░░████    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     ████▄░░▀░░░░░░░▀░░▄████    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     ██▀░░░░░▄█████▄░░░░░▀██    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     █░░░░░░░▀█████▀░░░░░░░█    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     █░░░░▄░░░░▀▀▀░░░░░▄░░░█    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-     ▀█░░░░▀▄▄▄▄▄▄▄▄▄▄▀░░░█▀    \n").c_str());
+answer_to_client(cs, (char *)(message + " :-      ▀▀▀█▄░░▀▄▄▄▄▄▄▀░░▄█▀▀     \n").c_str());
+answer_to_client(cs, (char *)(message + " :-          ▀▀█▄▄▄▄▄▄▄▄█▀▀        \n").c_str());
+answer_to_client(cs, (char *)(message + " :-                                \n").c_str());
+answer_to_client(cs, (char *)(":" + this->servername + " 376 " + nick + " :End of /method command\033[0m\n").c_str());
 }
 
 void	IRC::authorization(int cs){
 	if (this->fds[cs].getPassword() != this->irc_pass){
 		close(cs);
 		this->client_drop(cs);
-		std::cout << "Client " << cs << " gone  away\n";
+		std::cout << "\033[0;34Client " << YELLOW << cs << " left server\n" << OFF_COLOR << std::endl;
 	}
 	else {
 		this->fds[cs].setAuth(true);

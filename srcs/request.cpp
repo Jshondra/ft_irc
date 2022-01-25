@@ -1,4 +1,12 @@
 #include "../includes/IRC.hpp"
+# define OFF_COLOR "\033[0m"
+# define RED "\033[0;31m"
+# define GREEN "\033[0;32m"
+# define YELLOW "\033[0;33"
+# define BLUE "\033[0;34"
+# define VIOLET "\033[0;35"
+# define LBLUE "\033[0;36"
+# define GREY "\033[0;37"
 
 std::vector<std::string> parse_text(std::string text) {
 	std::vector<std::string> commands;
@@ -42,7 +50,7 @@ void	reader_client(IRC *irc, int cs) {
 	std::vector<std::string> commands;
 
 	text = getter_clean_txt(cs);
-	std::cout << "Client #" << cs << ": " << std::endl << text;
+	std::cout << "Client #" << cs << ": \033[0m"  << std::endl << text;
 	if (text.size() < 1)
 		irc->command_case(our_own_split("QUIT :the client on the other end of the link died", " "), cs);
 	else if (text.back() == '\n' && text.size() > 1)

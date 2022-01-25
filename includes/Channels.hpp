@@ -7,10 +7,10 @@
 
 class Channels {
 	private:
-		std::vector<int> clients;
-		std::vector<int> moder;
-		std::vector<int> not_moder;
-		std::string name_chat;
+		std::vector<int> clients;//все клиенты
+		std::vector<int> moderator; //moder
+		std::vector<int> users; //not_moder - клиенты не модераторы
+		std::string channel_name; //name_chat
 		std::string password;
 		std::string topic;
 
@@ -19,22 +19,27 @@ class Channels {
 		void	add_new_client(int cs);
 
 	public:
-		Channels(void);
-		~Channels(void);
+		Channels();
+		~Channels();
 
 		void				clean_channel(void);
-		void				add_moder(int cs);
-		void				add_not_moder(int cs);
-		std::vector<int>	get_users(void);
-		std::vector<int>	get_list_moder(void);
-		std::vector<int>	get_list_not_moder(void);
-		std::string			get_name_channel(void);
-		std::string			getPassword(void);
+		void				add_moderator(int cs);
+		void				add_users(int cs);
+
+		std::vector<int>	getClients(void);
+		std::vector<int>	getModerator(void);
+		std::vector<int>	getUsers(void);
+
+		void				setChannelName(std::string channel_name);
+		std::string			getChannelName(void);
+
 		void				setPassword(std::string password);
-		void				set_name_channel(std::string name_chat);
+		std::string			getPassword(void);
+
+		void				setTopic(std::string topic);
+		std::string			getTopic(void);
+
 		int					leaving_particimant(int cs);
-		void				set_topic_cmd(std::string topic);
-		std::string			get_topic_cmd(void);
 };
 
 #endif
