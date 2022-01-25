@@ -3,7 +3,7 @@
 # define CLIENT_HPP
 
 # include <iostream>
-# include "IRC.hpp"
+# include "Server.hpp"
 # include <strings.h>
 # include <vector>
 # include <sstream>
@@ -15,21 +15,17 @@
 
 class Client {
 	private:
-	// int type
 		int			fd_value;
-		void		(*fct_read)(class IRC *irc, int s);
-		void		(*fct_write)(class IRC *irc, int s);
+		void		(*fct_read)(class Server *irc, int s);
+		void		(*fct_write)(class Server *irc, int s);
 		char		buf_read[BUF_SIZE + 1];
 		char		buf_write[BUF_SIZE + 1];
 		time_t		reg_time;
-		// std::string	nick;
+
 		std::string	nickname;
-		// std::string	user;
 		std::string	username;
-		// std::string	password;
 		std::string	password;
 		std::string	realname;
-		// std::string away_mes;
 		std::string away_message;
 		std::vector<std::string> channels;
 		bool		auth;
@@ -41,8 +37,8 @@ class Client {
 
 		Client&	operator=(const Client &fd);
 
-		void		exRead(IRC *irc, int cs);
-		void		exWrite(IRC *irc, int cs);
+		void		exRead(Server *irc, int cs);
+		void		exWrite(Server *irc, int cs);
 		void		cleanClient(void);
 		void		cleanBufRead();
 		void		addChannel(std::string name);
@@ -68,8 +64,8 @@ class Client {
 		void		setAuth(bool auth);
 		void		setNickname(std::string name);
 		void		setaway_cmd(std::string message);
-		void		setFctRead(void (*fct_read)(IRC *irc, int s));
-		void		setFctWrite(void (*fct_write)(IRC *irc, int s));
+		void		setFctRead(void (*fct_read)(Server *irc, int s));
+		void		setFctWrite(void (*fct_write)(Server *irc, int s));
 		void		setRegTime(time_t reg);
 };
 

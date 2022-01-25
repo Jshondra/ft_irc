@@ -1,15 +1,5 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 #include "../includes/Client.hpp"
-
-# define OFF_COLOR "\033[0m"
-# define RED "\033[0;31m"
-# define GREEN "\033[0;32m"
-# define YELLOW "\033[0;33"
-# define BLUE "\033[0;34"
-# define VIOLET "\033[0;35"
-# define LBLUE "\033[0;36"
-# define GREY "\033[0;37"
-
 
 bool	g_run;
 
@@ -21,7 +11,7 @@ void	handler(int sig)
 
 void start_server(std::string host, int port, std::string pass)
 {
-	IRC irc(host, port, pass);
+	Server irc(host, port, pass);
 	
 	g_run = true;
 	signal(SIGINT, handler);

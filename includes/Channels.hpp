@@ -8,9 +8,9 @@
 class Channels {
 	private:
 		std::vector<int> clients;//все клиенты
-		std::vector<int> moderator; //moder
-		std::vector<int> users; //not_moder - клиенты не модераторы
-		std::string channel_name; //name_chat
+		std::vector<int> moderator;
+		std::vector<int> users; //клиенты не модераторы
+		std::string channel_name;
 		std::string password;
 		std::string topic;
 

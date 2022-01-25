@@ -1,6 +1,6 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
-void	IRC::away_cmd(std::vector<std::string> cmd, int cs) {
+void	Server::away_cmd(std::vector<std::string> cmd, int cs) {
     std::string message;
 
     if (cmd.size() == 1)

@@ -1,6 +1,6 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
-void IRC::user_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) 
+void Server::user_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) 
 {
 	std::string answer;
 	std::string message;
@@ -22,7 +22,7 @@ void IRC::user_sender(std::vector<std::string> cmd, int client_fd, int cs, std::
 	}
 }
 
-void IRC::channel_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) {
+void Server::channel_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) {
 	std::string answer;
 	std::string message;
 
@@ -35,7 +35,7 @@ void IRC::channel_sender(std::vector<std::string> cmd, int client_fd, int cs, st
 			answer_to_client(users[i], (char *) answer.c_str());
 }
 
-void	IRC::privmsg_cmd(std::vector<std::string> cmd, int cs)
+void	Server::privmsg_cmd(std::vector<std::string> cmd, int cs)
 {
 	int			client_fd;
 	std::string sender;

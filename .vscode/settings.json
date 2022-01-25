@@ -1,9 +1,14 @@
 {
 	"files.associations": {
+<<<<<<< HEAD
 		"vector": "cpp",
 		"__split_buffer": "cpp",
 		"deque": "cpp",
 		"string": "cpp",
 		"ostream": "cpp"
+=======
+		"iosfwd": "cpp",
+		"string": "cpp"
+>>>>>>> 81f80bf66162fde5e4179d626ee1cd5b9ab9339b
 	}
 }

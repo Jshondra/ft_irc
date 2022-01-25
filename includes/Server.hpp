@@ -1,6 +1,6 @@
 #pragma once
-#ifndef IRC_HPP
-# define IRC_HPP
+#ifndef SERVER_HPP
+# define SERVER_HPP
 
 # include  <iostream>
 # include "Client.hpp"
@@ -18,10 +18,10 @@
 
 # define MAX_CLIENT 120
 # define MAX_CHANNELS 10
-# define SERVERNAME	"IRC_bro"
+# define SERVERNAME	"Mickey_IRC_Mouse"
 # define MAX(a,b)	((a > b) ? a : b)
 
-class IRC {
+class Server {
 	private:
 		class Client	*fds;
 		class Channels	*channels;
@@ -33,12 +33,12 @@ class IRC {
 		in_addr_t		hostname;
 		std::string 	irc_pass;
 		std::string		servername;
-		std::map<std::string, void (IRC::*)(std::vector<std::string> cmd, int cs)>	commands;
+		std::map<std::string, void (Server::*)(std::vector<std::string> cmd, int cs)>	commands;
 		
-		IRC();
+		Server();
 
-		void	srv_create();
-		void	init_cmds();
+		void	creation_server();
+		void	all_commands();
 		void	reader_clienting(int i);
 		void	client_writing(int i);
 		void	authorization(int cs);
@@ -46,41 +46,37 @@ class IRC {
 		void	answer_server(int cs, int num, std::string nick, std::string cmd);
 		void	after_join_cmd(int cs, int chn);
 		void	join_participants(int cs, int chn);
-		void	ch_joiner(int cs, std::string name, std::string pass); //join_channel
-		void	selecter_each(std::string cmd, int cs, std::string answer); //part_for_each
-		void	method(int cs, std::string nick); //motd
-		void	nickname_changer(std::string nick, int cs); //change_nick
-		void	file_accepter(std::vector<std::string> cmd); //accept_file
-		void	write_accepter(std::string name, int port); //accept_write
+		void	ch_joiner(int cs, std::string name, std::string pass);
+		void	selecter_each(std::string cmd, int cs, std::string answer);
+		void	method(int cs, std::string nick);
+		void	nickname_changer(std::string nick, int cs);
 		void	kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::string name);
 		
-		void	user_sender(std::vector<std::string> cmd, int client_fd, int cs,\
-		 std::string sender, std::string recipient); //send_user
-		void	channel_sender(std::vector<std::string> cmd, int client_fd, int cs,\
-		 std::string sender, std::string recipient); //send_channels
+		void	user_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient);
+		void	channel_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient);
 
 	public:
 		int		r;
 		fd_set	fd_read;
 		fd_set	fd_write;
 
-		IRC(std::string host, int port, std::string pass);
-		IRC(const IRC &irc);
-		~IRC(void);
+		Server(std::string host, int port, std::string pass);
+		Server(const Server &irc);
+		~Server(void);
 
-		IRC&	operator=(const IRC &irc);
+		Server&	operator=(const Server &irc);
 
-		void	fd_make(); //init_fd
-		void	select_to_do(); //do_select
-		void	fd_checker(); //check_fd
-		bool	nickname_checker(const std::string& nick); //check_nick
-		bool	run_checker(bool run);//check_run
-		void	command_case(std::vector<std::string> cmd, int cs); //choose_cmd
+		void	fd_make();
+		void	select_to_do();
+		void	fd_checker();
+		bool	nickname_checker(const std::string& nick);
+		bool	run_checker(bool run);
+		void	command_case(std::vector<std::string> cmd, int cs);
 
-		void	client_adder(int cs); //add_client
+		void	client_adder(int cs);
 		void	clean_read_buf(int cs);
-		void	client_drop(int cs); // delete_client
-		bool	nickname_repl(const std::string& nick); //replay_nick
+		void	client_drop(int cs);
+		bool	nickname_repl(const std::string& nick);
 
 		int		get_fd_channel(std::string name);
 		char	*get_read_buf(int cs);
@@ -89,12 +85,11 @@ class IRC {
 		int		get_fd(const std::string& nick);
 		int		getFdValue_client(int cs);
 		
-		// сmd
-		void	nick_cmd(std::vector<std::string> cmd, int cs); //nick
-		void	user_cmd(std::vector<std::string> cmd, int cs); //user
-		void	pass_cmd(std::vector<std::string> cmd, int cs); // ...
-		void	privmsg_cmd(std::vector<std::string> cmd, int cs);//privmsg_notice
-		void	ison_cmd(std::vector<std::string> cmd, int cs); //json
+		void	nick_cmd(std::vector<std::string> cmd, int cs);
+		void	user_cmd(std::vector<std::string> cmd, int cs);
+		void	pass_cmd(std::vector<std::string> cmd, int cs);
+		void	privmsg_cmd(std::vector<std::string> cmd, int cs);
+		void	ison_cmd(std::vector<std::string> cmd, int cs);
 		void	join_cmd(std::vector<std::string> cmd, int cs);
 		void	ping_cmd(std::vector<std::string> cmd, int cs);
 		void	who_cmd(std::vector<std::string> cmd, int cs);
@@ -108,9 +103,9 @@ class IRC {
 		
 };
 
-void		server_accepter(IRC *irc, int s); //srv_accept
-void		reader_client(IRC *irc, int cs);
-void		writer_client(IRC *irc, int cs);
+void		server_accepter(Server *irc, int s);
+void		reader_client(Server *irc, int cs);
+void		writer_client(Server *irc, int cs);
 std::string	strjoin_cmd(std::vector<std::string> vector, const std::string& delim, int start, int end);
 std::vector<std::string>	our_own_split(const std::string& str, const std::string& sep);
 std::string	getter_clean_txt(int cs);

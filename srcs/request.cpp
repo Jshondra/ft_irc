@@ -1,12 +1,4 @@
-#include "../includes/IRC.hpp"
-# define OFF_COLOR "\033[0m"
-# define RED "\033[0;31m"
-# define GREEN "\033[0;32m"
-# define YELLOW "\033[0;33"
-# define BLUE "\033[0;34"
-# define VIOLET "\033[0;35"
-# define LBLUE "\033[0;36"
-# define GREY "\033[0;37"
+#include "../includes/Server.hpp"
 
 std::vector<std::string> parse_text(std::string text) {
 	std::vector<std::string> commands;
@@ -44,7 +36,7 @@ std::string	getter_clean_txt(int cs) {
 	return text;
 }
 
-void	reader_client(IRC *irc, int cs) {
+void	reader_client(Server *irc, int cs) {
 	std::string text;
 	std::vector<std::string> cmd;
 	std::vector<std::string> commands;

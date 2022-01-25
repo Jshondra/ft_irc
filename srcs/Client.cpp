@@ -38,11 +38,11 @@ void	Client::setFdValue(int fd_value) {
 	this->fd_value = fd_value;
 }
 
-void	Client::setFctRead(void (*fct_read)(IRC *irc, int s)) {
+void	Client::setFctRead(void (*fct_read)(Server *irc, int s)) {
 	this->fct_read = fct_read;
 }
 
-void	Client::setFctWrite(void (*fct_write)(IRC *irc, int s)) {
+void	Client::setFctWrite(void (*fct_write)(Server *irc, int s)) {
 	this->fct_write = fct_write;
 }
 
@@ -62,10 +62,10 @@ int		Client::getFdValue(void) {
 	return this->fd_value;
 }
 
-void	Client::exRead(IRC *irc, int cs) {
+void	Client::exRead(Server *irc, int cs) {
 	this->fct_read(irc, cs);
 }
-void	Client::exWrite(IRC *irc, int cs) {
+void	Client::exWrite(Server *irc, int cs) {
 	this->fct_write(irc, cs);
 }
 

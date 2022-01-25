@@ -1,15 +1,8 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
 # define OFF_COLOR "\033[0m"
-# define RED "\033[0;31m"
-# define GREEN "\033[0;32m"
-# define YELLOW "\033[0;33"
-# define BLUE "\033[0;34"
-# define VIOLET "\033[0;35"
-# define LBLUE "\033[0;36"
-# define GREY "\033[0;37"
 
-void	IRC::ping_cmd(std::vector<std::string> cmd, int cs){
+void	Server::ping_cmd(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	std::string pong = "PONG ";
 	std::stringstream t_now;
@@ -19,7 +12,7 @@ void	IRC::ping_cmd(std::vector<std::string> cmd, int cs){
 	answer_to_client(cs, (char *)pong.c_str());
 }
 
-void	IRC::ison_cmd(std::vector<std::string> cmd, int cs){
+void	Server::ison_cmd(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	int cs_auth;
 
@@ -41,7 +34,7 @@ void	IRC::ison_cmd(std::vector<std::string> cmd, int cs){
 	}
 }
 
-int	IRC::get_fd_channel(std::string name){
+int	Server::get_fd_channel(std::string name){
 	for (int i = 0; i < MAX_CHANNELS; i++) {
 		if (this->channels[i].getChannelName() == name){
 			return i;
@@ -50,7 +43,7 @@ int	IRC::get_fd_channel(std::string name){
 	return -1;
 }
 
-void	IRC::join_cmd(std::vector<std::string> cmd, int cs){
+void	Server::join_cmd(std::vector<std::string> cmd, int cs){
 	size_t pass;
 	std::string password;
 
@@ -73,7 +66,7 @@ void	IRC::join_cmd(std::vector<std::string> cmd, int cs){
 
 }
 
-void	IRC::ch_joiner(int cs, std::string name, std::string pass){
+void	Server::ch_joiner(int cs, std::string name, std::string pass){
 	int i;
 
 
@@ -111,7 +104,7 @@ void	IRC::ch_joiner(int cs, std::string name, std::string pass){
 	}
 }
 
-void	IRC::after_join_cmd(int cs, int chn){
+void	Server::after_join_cmd(int cs, int chn){
 	std::string mess = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + "@" + this->host + " JOIN :" + this->channels[chn].getChannelName() + "\n";
 	std::vector<int> clients = this->channels[chn].getClients();
 	for (size_t i = 0; i < clients.size(); i++) {
@@ -128,7 +121,7 @@ void	IRC::after_join_cmd(int cs, int chn){
 	answer_server(cs, 366, this->fds[cs].getNickname(), this->channels[chn].getChannelName());
 }
 
-void	IRC::join_participants(int cs, int chn){
+void	Server::join_participants(int cs, int chn){
 	std::string mess = ":" + this->servername + " 353 " + this->fds[cs].getNickname() + " = " + this->channels[chn].getChannelName() + " :";
 	std::vector<int> clients = this->channels[chn].getModerator();
 	for (size_t i = 0; i < clients.size(); i++) {
@@ -146,7 +139,7 @@ void	IRC::join_participants(int cs, int chn){
 	answer_to_client(cs, (char *)mess.c_str());
 }
 
-void	IRC::names_cmd(std::vector<std::string> cmd, int cs){
+void	Server::names_cmd(std::vector<std::string> cmd, int cs){
 	std::string answer;
 	int found;
 	int count_found;
@@ -178,12 +171,12 @@ void	IRC::names_cmd(std::vector<std::string> cmd, int cs){
 		answer_server(cs, 366, this->fds[cs].getNickname(), answer);
 }
 
-void	IRC::who_cmd(std::vector<std::string> cmd, int cs){
+void	Server::who_cmd(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	answer_server(cs, 315, this->fds[cs].getNickname(), this->fds[cs].getNickname());
 }
 
-void	IRC::whois_cmd(std::vector<std::string> cmd, int cs){
+void	Server::whois_cmd(std::vector<std::string> cmd, int cs){
 	int cs_auth;
 	std::stringstream t_reg;
 	std::stringstream t_now;
@@ -203,7 +196,7 @@ void	IRC::whois_cmd(std::vector<std::string> cmd, int cs){
 	}
 }
 
-void	IRC::part_cmd(std::vector<std::string> cmd, int cs){
+void	Server::part_cmd(std::vector<std::string> cmd, int cs){
 	std::string answer;
 	for (size_t i = 1; i < cmd.size(); i++) {
 		answer = ":" + this->fds[cs].getNickname() + "!" + this->fds[cs].getUsername() + this->host + " PART " + cmd[i] + "\n";
@@ -212,7 +205,7 @@ void	IRC::part_cmd(std::vector<std::string> cmd, int cs){
 	}
 }
 
-void	IRC::selecter_each(std::string name, int cs, std::string answer){
+void	Server::selecter_each(std::string name, int cs, std::string answer){
 	int fd_chn;
 
 	fd_chn = this->get_fd_channel(name);
@@ -240,7 +233,7 @@ void	IRC::selecter_each(std::string name, int cs, std::string answer){
 	}
 }
 
-void	IRC::topic_cmd(std::vector<std::string> cmd, int cs) {
+void	Server::topic_cmd(std::vector<std::string> cmd, int cs) {
 	std::vector<std::string> chn = this->fds[cs].getChannels();
 	size_t i = 0;
 	std::string answer;
@@ -269,7 +262,7 @@ void	IRC::topic_cmd(std::vector<std::string> cmd, int cs) {
 	for (size_t i = 0; i < moder.size(); i++) {
 		if (cs == moder[i]) {
 			answer = strjoin_cmd(cmd, " ", 2, cmd.size());
-			std::cout << GREEN << answer << OFF_COLOR << std::endl;
+			std::cout << answer << std::endl;
 			this->channels[fd].setTopic(answer);
 			return ;
 		}
@@ -278,7 +271,7 @@ void	IRC::topic_cmd(std::vector<std::string> cmd, int cs) {
 	
 }
 
-void	IRC::quit_cmd(std::vector<std::string> cmd, int cs) {
+void	Server::quit_cmd(std::vector<std::string> cmd, int cs) {
 	std::string answer;
 	std::vector<std::string> channels;
 
@@ -298,7 +291,7 @@ void	IRC::quit_cmd(std::vector<std::string> cmd, int cs) {
 	close(cs);
 }
 
-void	IRC::kick_cmd(std::vector<std::string> cmd, int cs) {
+void	Server::kick_cmd(std::vector<std::string> cmd, int cs) {
 	std::vector<std::string> chn = this->fds[cs].getChannels();
 	size_t i = 0;
 	std::string answer;
@@ -328,7 +321,7 @@ void	IRC::kick_cmd(std::vector<std::string> cmd, int cs) {
 	
 }
 
-void IRC::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::string name){
+void Server::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::string name){
 	std::vector<int> users;
 	size_t i = 0;
 

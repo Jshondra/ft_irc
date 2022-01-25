@@ -1,6 +1,6 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
-void	IRC::answer_server(int cs, int num, std::string nick, std::string cmd){
+void	Server::answer_server(int cs, int num, std::string nick, std::string cmd) {
 	std::string answer = ":" + this->servername + " ";
 	answer.append(std::to_string(num));
 	answer.append(" ");
@@ -68,7 +68,6 @@ void	IRC::answer_server(int cs, int num, std::string nick, std::string cmd){
 	}
 }
 
-void	IRC::answer_to_client(int cs, char *str) {
-	// std::cout << "Answer to " << this->fds[cs].get_nick_cmd() << ":!\n" << str << std::endl;
+void	Server::answer_to_client(int cs, char *str) {
 	send(cs, str, strlen(str), SO_NOSIGPIPE);
 }

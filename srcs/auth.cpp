@@ -1,15 +1,6 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
-# define OFF_COLOR "\033[0m"
-# define RED "\033[0;31m"
-# define GREEN "\033[0;32m"
-# define YELLOW "\033[0;33"
-# define BLUE "\033[0;34"
-# define VIOLET "\033[0;35"
-# define LBLUE "\033[0;36"
-# define GREY "\033[0;37"
-
-bool IRC::nickname_repl(const std::string& nick) {
+bool Server::nickname_repl(const std::string& nick) {
 	for (int i = 4; i != this->maxfd; ++i)
 	{
 		if (this->fds[i].getNickname() == nick)
@@ -18,7 +9,7 @@ bool IRC::nickname_repl(const std::string& nick) {
 	return false;
 }
 
-bool IRC::nickname_checker(const std::string& nick) {
+bool Server::nickname_checker(const std::string& nick) {
 	for (size_t i = 0; i != nick.size(); ++i)
 	{
 		if (!isalnum(nick[i]))
@@ -27,7 +18,7 @@ bool IRC::nickname_checker(const std::string& nick) {
 	return false;
 }
 
-void	IRC::nick_cmd(std::vector<std::string> cmd, int cs)
+void	Server::nick_cmd(std::vector<std::string> cmd, int cs)
 {
 	std::string	nick;
 	
@@ -49,7 +40,7 @@ void	IRC::nick_cmd(std::vector<std::string> cmd, int cs)
 		this->authorization(cs);
 }
 
-void	IRC::nickname_changer(std::string nick, int cs){
+void	Server::nickname_changer(std::string nick, int cs){
 	std::string answer;
 	std::vector<std::string> channels;
 	std::vector<int> chnl_clients;
@@ -68,7 +59,7 @@ void	IRC::nickname_changer(std::string nick, int cs){
 }
 
 
-void	IRC::user_cmd(std::vector<std::string> cmd, int cs)
+void	Server::user_cmd(std::vector<std::string> cmd, int cs)
 {
 	std::string realname;
 
@@ -85,7 +76,7 @@ void	IRC::user_cmd(std::vector<std::string> cmd, int cs)
 		this->authorization(cs);
 }
 
-void	IRC::pass_cmd(std::vector<std::string> cmd, int cs)
+void	Server::pass_cmd(std::vector<std::string> cmd, int cs)
 {
 	std::string	pass;
 	
@@ -94,7 +85,7 @@ void	IRC::pass_cmd(std::vector<std::string> cmd, int cs)
 	this->fds[cs].setPassword(cmd[1]);
 }
 
-void IRC::method(int cs, std::string nick) {
+void Server::method(int cs, std::string nick) {
 	std::string message = ":" + this->servername + " 372 " + nick;
 	answer_to_client(cs, (char *)(":" + this->servername + " 375 " + nick + " :- " + this->servername +
 			" Message of the day -\n").c_str());
@@ -120,11 +111,11 @@ answer_to_client(cs, (char *)(message + " :-                                \n")
 answer_to_client(cs, (char *)(":" + this->servername + " 376 " + nick + " :End of /method command\033[0m\n").c_str());
 }
 
-void	IRC::authorization(int cs){
+void	Server::authorization(int cs){
 	if (this->fds[cs].getPassword() != this->irc_pass){
 		close(cs);
 		this->client_drop(cs);
-		std::cout << "\033[0;34Client " << YELLOW << cs << " left server\n" << OFF_COLOR << std::endl;
+		std::cout << "Client " << cs << " left server\n" << std::endl;
 	}
 	else {
 		this->fds[cs].setAuth(true);

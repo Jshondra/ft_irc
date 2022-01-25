@@ -1,43 +1,36 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
 # define OFF_COLOR "\033[0m"
-# define RED "\033[0;31m"
-# define GREEN "\033[0;32m"
-# define YELLOW "\033[0;33"
-# define BLUE "\033[0;34"
-# define VIOLET "\033[0;35"
-# define LBLUE "\033[0;36"
-# define GREY "\033[0;37"
 
-IRC::IRC(std::string host, int port, std::string pass) {
+Server::Server(std::string host, int port, std::string pass) {
 	maxfd = MAX_CLIENT;
 	fds = new Client[maxfd];
 	channels = new Channels[MAX_CHANNELS];
 	this->port = port;
 	this->irc_pass = pass;
 	this->host = host;
-	srv_create();
-	init_cmds();
+	creation_server();
+	all_commands();
 }
 
-IRC::IRC(const IRC &irc) {
-	*this = irc;
+Server::Server(const Server &server) {
+	*this = server;
 }
 
-IRC::~IRC(void) {
+Server::~Server(void) {
 	delete[] fds;
 	delete[] channels;
 }
 
-IRC&	IRC::operator=(const IRC &irc) {
-	if (this != &irc){
-		maxfd = irc.maxfd;
-		fds = irc.fds;
+Server&	Server::operator=(const Server &server) {
+	if (this != &server){
+		maxfd = server.maxfd;
+		fds = server.fds;
 	}
 	return (*this);
 }
 
-void	IRC::srv_create(void) {
+void	Server::creation_server(void) {
 	struct sockaddr_in	sin;
 
 	this->sock = socket(PF_INET, SOCK_STREAM, 0);
@@ -68,7 +61,7 @@ void	IRC::srv_create(void) {
 	this->fds[this->sock].setFctRead(server_accepter);
 }
 
-void	server_accepter(IRC *irc, int s) {
+void	server_accepter(Server *irc, int s) {
 	int					cs;
 	struct sockaddr_in	csin;
 	socklen_t			csin_len;
@@ -83,42 +76,42 @@ void	server_accepter(IRC *irc, int s) {
 	}
 }
 
-void	IRC::clean_read_buf(int cs) {
+void	Server::clean_read_buf(int cs) {
 	fds[cs].cleanBufRead();
 }
 
-char*	IRC::get_read_buf(int cs) {
+char*	Server::get_read_buf(int cs) {
 	return fds[cs].getBufRead();
 }
 
-char*	IRC::get_write_buf(int cs) {
+char*	Server::get_write_buf(int cs) {
 	return fds[cs].getBufWrite();
 }
 
-void	writer_client(IRC *irc, int cs){
+void	writer_client(Server *irc, int cs){
 	(void)cs;
 	(void)irc;
 }
 
-int		IRC::get_maxfd() {
+int		Server::get_maxfd() {
 	return this->maxfd;
 }
 
-int		IRC::getFdValue_client(int cs){
+int		Server::getFdValue_client(int cs){
 	return this->fds[cs].getFdValue();
 }
 
-void	IRC::client_adder(int cs){
+void	Server::client_adder(int cs){
 	this->fds[cs].setFdValue(FD_CLIENT);
 	this->fds[cs].setFctRead(reader_client);
 	this->fds[cs].setFctWrite(writer_client);
 }
 
-void	IRC::client_drop(int cs) {
+void	Server::client_drop(int cs) {
 	this->fds[cs].cleanClient();
 }
 
-void	IRC::fd_make() {
+void	Server::fd_make() {
 	int	i;
 
 	i = 0;
@@ -137,11 +130,11 @@ void	IRC::fd_make() {
 	}
 }
 
-void	IRC::select_to_do() {
+void	Server::select_to_do() {
 	this->r = select(this->max + 1, &this->fd_read, &this->fd_write, nullptr, nullptr);
 }
 
-void	IRC::fd_checker() {
+void	Server::fd_checker() {
 	int	i;
 
 	i = 0;
@@ -156,37 +149,37 @@ void	IRC::fd_checker() {
 	}
 }
 
-void	IRC::reader_clienting(int i){
+void	Server::reader_clienting(int i){
 	this->fds[i].exRead(this, i);
 }
 
-void	IRC::client_writing(int i){
+void	Server::client_writing(int i){
 	this->fds[i].exWrite(this, i);
 }
 
-void IRC::init_cmds()
+void Server::all_commands()
 {
-	this->commands["NICK"] = &IRC::nick_cmd;
-	this->commands["USER"] = &IRC::user_cmd;
-	this->commands["PASS"] = &IRC::pass_cmd;
-	this->commands["PRIVMSG"] = &IRC::privmsg_cmd;
-	this->commands["NOTICE"] = &IRC::ison_cmd;
-	this->commands["ISON"] = &IRC::ison_cmd;
-	this->commands["PING"] = &IRC::ping_cmd;
-	this->commands["JOIN"] = &IRC::join_cmd;
-	this->commands["WHO"] = &IRC::who_cmd;
-	this->commands["WHOIS"] = &IRC::whois_cmd;
-	this->commands["PART"] = &IRC::part_cmd;
-	this->commands["AWAY"] = &IRC::away_cmd;
-	this->commands["NAMES"] = &IRC::names_cmd;
-	this->commands["TOPIC"] = &IRC::topic_cmd;
-	this->commands["QUIT"] = &IRC::quit_cmd;
-	this->commands["KICK"] = &IRC::kick_cmd;
+	this->commands["NICK"] = &Server::nick_cmd;
+	this->commands["USER"] = &Server::user_cmd;
+	this->commands["PASS"] = &Server::pass_cmd;
+	this->commands["PRIVMSG"] = &Server::privmsg_cmd;
+	this->commands["NOTICE"] = &Server::ison_cmd;
+	this->commands["ISON"] = &Server::ison_cmd;
+	this->commands["PING"] = &Server::ping_cmd;
+	this->commands["JOIN"] = &Server::join_cmd;
+	this->commands["WHO"] = &Server::who_cmd;
+	this->commands["WHOIS"] = &Server::whois_cmd;
+	this->commands["PART"] = &Server::part_cmd;
+	this->commands["AWAY"] = &Server::away_cmd;
+	this->commands["NAMES"] = &Server::names_cmd;
+	this->commands["TOPIC"] = &Server::topic_cmd;
+	this->commands["QUIT"] = &Server::quit_cmd;
+	this->commands["KICK"] = &Server::kick_cmd;
 }
 
-void	IRC::command_case(std::vector<std::string> cmd, int cs)
+void	Server::command_case(std::vector<std::string> cmd, int cs)
 {
-	std::map<std::string, void (IRC::*)(std::vector<std::string> cmd, int cs)>::iterator found;
+	std::map<std::string, void (Server::*)(std::vector<std::string> cmd, int cs)>::iterator found;
     found = this->commands.find(cmd.front());
 	if (found != commands.end())
 	{
@@ -210,7 +203,7 @@ void	IRC::command_case(std::vector<std::string> cmd, int cs)
 }
 
 
-int		IRC::get_fd(const std::string& nick) {
+int		Server::get_fd(const std::string& nick) {
 	for (int i = 4; i != this->get_maxfd(); ++i)
 	{
 		if (nick == this->fds[i].getNickname())
@@ -219,7 +212,7 @@ int		IRC::get_fd(const std::string& nick) {
 	return -1;
 }
 
-bool	IRC::run_checker(bool run) {
+bool	Server::run_checker(bool run) {
 	if (run)
 		return true;
 	for (int fd = 3; fd < this->maxfd; ++fd)
@@ -235,5 +228,4 @@ bool	IRC::run_checker(bool run) {
 	exit(130);
 }
 
-IRC::IRC() {}
- 
+Server::Server() {}
