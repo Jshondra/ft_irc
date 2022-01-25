@@ -38,11 +38,11 @@ void	Client::set_type(int type) {
 	this->type = type;
 }
 
-void	Client::set_fct_read(void (*fct_read)(IRC *irc, int s)) {
+void	Client::set_fct_read(void (*fct_read)(Server *irc, int s)) {
 	this->fct_read = fct_read;
 }
 
-void	Client::set_fct_write(void (*fct_write)(IRC *irc, int s)) {
+void	Client::set_fct_write(void (*fct_write)(Server *irc, int s)) {
 	this->fct_write = fct_write;
 }
 
@@ -62,10 +62,10 @@ int		Client::get_type(void) {
 	return this->type;
 }
 
-void	Client::ex_read(IRC *irc, int cs) {
+void	Client::ex_read(Server *irc, int cs) {
 	this->fct_read(irc, cs);
 }
-void	Client::ex_write(IRC *irc, int cs) {
+void	Client::ex_write(Server *irc, int cs) {
 	this->fct_write(irc, cs);
 }
 

@@ -3,7 +3,7 @@
 # define CLIENT_HPP
 
 # include <iostream>
-# include "IRC.hpp"
+# include "Server.hpp"
 # include <strings.h>
 # include <vector>
 # include <sstream>
@@ -16,8 +16,8 @@
 class Client {
 	private:
 		int			type;
-		void		(*fct_read)(class IRC *irc, int s);
-		void		(*fct_write)(class IRC *irc, int s);
+		void		(*fct_read)(class Server *irc, int s);
+		void		(*fct_write)(class Server *irc, int s);
 		char		buf_read[BUF_SIZE + 1];
 		char		buf_write[BUF_SIZE + 1];
 		time_t		reg_time;
@@ -36,8 +36,8 @@ class Client {
 
 		Client&	operator=(const Client &fd);
 
-		void		ex_read(IRC *irc, int cs);
-		void		ex_write(IRC *irc, int cs);
+		void		ex_read(Server *irc, int cs);
+		void		ex_write(Server *irc, int cs);
 		void		clean_client(void);
 		void		clean_buf_read();
 		void		add_channel(std::string name);
@@ -63,8 +63,8 @@ class Client {
 		void		set_auth(bool auth);
 		void		set_nick(std::string name);
 		void		set_away(std::string message);
-		void		set_fct_read(void (*fct_read)(IRC *irc, int s));
-		void		set_fct_write(void (*fct_write)(IRC *irc, int s));
+		void		set_fct_read(void (*fct_read)(Server *irc, int s));
+		void		set_fct_write(void (*fct_write)(Server *irc, int s));
 		void		set_retg_time(time_t reg);
 };
 

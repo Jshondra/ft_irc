@@ -1,17 +1,17 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
 
-void	IRC::ping(std::vector<std::string> cmd, int cs){
+void	Server::ping(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	std::string pong = "PONG ";
 	std::stringstream t_now;
 
 	t_now << time(0);
 	pong.append(t_now.str() + "\n");
-	answer_to_client(cs, (char *)pong.c_str());
+	server_answering(cs, (char *)pong.c_str());
 }
 
-void	IRC::ison(std::vector<std::string> cmd, int cs){
+void	Server::ison(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	int cs_auth;
 
@@ -29,11 +29,11 @@ void	IRC::ison(std::vector<std::string> cmd, int cs){
 			}
 		}
 		answer.append("\n");
-		answer_to_client(cs, (char *)answer.c_str());
+		server_answering(cs, (char *)answer.c_str());
 	}
 }
 
-int	IRC::get_fd_channel(std::string name){
+int	Server::get_fd_channel(std::string name){
 	for (int i = 0; i < MAX_CHANNELS; i++) {
 		if (this->channels[i].get_name_channel() == name){
 			return i;
@@ -42,7 +42,7 @@ int	IRC::get_fd_channel(std::string name){
 	return -1;
 }
 
-void	IRC::join(std::vector<std::string> cmd, int cs){
+void	Server::join(std::vector<std::string> cmd, int cs){
 	size_t pass;
 	std::string password;
 
@@ -65,7 +65,7 @@ void	IRC::join(std::vector<std::string> cmd, int cs){
 
 }
 
-void	IRC::join_channel(int cs, std::string name, std::string pass){
+void	Server::join_channel(int cs, std::string name, std::string pass){
 	int i;
 
 
@@ -103,24 +103,24 @@ void	IRC::join_channel(int cs, std::string name, std::string pass){
 	}
 }
 
-void	IRC::after_join(int cs, int chn){
+void	Server::after_join(int cs, int chn){
 	std::string mess = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + "@" + this->host + " JOIN :" + this->channels[chn].get_name_channel() + "\n";
 	std::vector<int> clients = this->channels[chn].get_users();
 	for (size_t i = 0; i < clients.size(); i++) {
-		answer_to_client(clients[i], (char *)mess.c_str());
+		server_answering(clients[i], (char *)mess.c_str());
 	}
 	if (this->channels[chn].get_topic() == "")
 		answer_server(cs, 331, this->fds[cs].get_nick(), this->channels[chn].get_name_channel());
 	else {
 		std::string answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " TOPIC " + this->channels[chn].get_name_channel() + " :" + this->channels[chn].get_topic() + "\n";
-		this->answer_to_client(cs, (char *)answer.c_str());
+		this->server_answering(cs, (char *)answer.c_str());
 	}
 	
 	join_participants(cs, chn);
 	answer_server(cs, 366, this->fds[cs].get_nick(), this->channels[chn].get_name_channel());
 }
 
-void	IRC::join_participants(int cs, int chn){
+void	Server::join_participants(int cs, int chn){
 	std::string mess = ":" + this->servername + " 353 " + this->fds[cs].get_nick() + " = " + this->channels[chn].get_name_channel() + " :";
 	std::vector<int> clients = this->channels[chn].get_list_moder();
 	for (size_t i = 0; i < clients.size(); i++) {
@@ -135,10 +135,10 @@ void	IRC::join_participants(int cs, int chn){
 			mess.append(" ");
 	}
 	mess.append("\n");
-	answer_to_client(cs, (char *)mess.c_str());
+	server_answering(cs, (char *)mess.c_str());
 }
 
-void	IRC::names(std::vector<std::string> cmd, int cs){
+void	Server::names(std::vector<std::string> cmd, int cs){
 	std::string answer;
 	int found;
 	int count_found;
@@ -170,12 +170,12 @@ void	IRC::names(std::vector<std::string> cmd, int cs){
 		answer_server(cs, 366, this->fds[cs].get_nick(), answer);
 }
 
-void	IRC::who(std::vector<std::string> cmd, int cs){
+void	Server::who(std::vector<std::string> cmd, int cs){
 	(void)cmd;
 	answer_server(cs, 315, this->fds[cs].get_nick(), this->fds[cs].get_nick());
 }
 
-void	IRC::whois(std::vector<std::string> cmd, int cs){
+void	Server::whois(std::vector<std::string> cmd, int cs){
 	int cs_auth;
 	std::stringstream t_reg;
 	std::stringstream t_now;
@@ -184,9 +184,9 @@ void	IRC::whois(std::vector<std::string> cmd, int cs){
 	if (cs_auth != -1 && this->fds[cs_auth].get_auth()) {
 		std::string mess;
 		mess = ":" + this->servername + " 311 " + this->fds[cs].get_nick() + " " + cmd[1] + " " + this->fds[cs_auth].get_user() + " " + this->host + " * :" + this->fds[cs_auth].get_realname() + "\n";
-		answer_to_client(cs, (char *)mess.c_str());
+		server_answering(cs, (char *)mess.c_str());
 		mess = ":" + this->servername + " 319 " + this->fds[cs].get_nick() + " " + cmd[1]  + this->fds[cs_auth].get_channels_string();
-		answer_to_client(cs, (char *)mess.c_str());
+		server_answering(cs, (char *)mess.c_str());
 		answer_server(cs, 312, this->fds[cs].get_nick(), cmd[1]);
 		t_now << time(0);
 		t_reg << time(0) - this->fds[cs].get_reg_time();
@@ -195,16 +195,16 @@ void	IRC::whois(std::vector<std::string> cmd, int cs){
 	}
 }
 
-void	IRC::part(std::vector<std::string> cmd, int cs){
+void	Server::part(std::vector<std::string> cmd, int cs){
 	std::string answer;
 	for (size_t i = 1; i < cmd.size(); i++) {
 		answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " PART " + cmd[i] + "\n";
-		answer_to_client(cs, (char *)answer.c_str());
+		server_answering(cs, (char *)answer.c_str());
 		this->part_for_each(cmd[i], cs, answer);
 	}
 }
 
-void	IRC::part_for_each(std::string name, int cs, std::string answer){
+void	Server::part_for_each(std::string name, int cs, std::string answer){
 	int fd_chn;
 
 	fd_chn = this->get_fd_channel(name);
@@ -217,12 +217,12 @@ void	IRC::part_for_each(std::string name, int cs, std::string answer){
 		if (new_lead >= 0){
 			std::vector<int> particimants_list = this->channels[fd_chn].get_users();
 			for (size_t j = 0; j < particimants_list.size(); j++) {
-				answer_to_client(particimants_list[j], (char *)answer.c_str());
+				server_answering(particimants_list[j], (char *)answer.c_str());
 			}
 			if (new_lead != 0) {
 				answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " MODE " + name + " +o " + this->fds[new_lead].get_nick() + "\n";
 				for (size_t j = 0; j < particimants_list.size(); j++) {
-				answer_to_client(particimants_list[j], (char *)answer.c_str());
+				server_answering(particimants_list[j], (char *)answer.c_str());
 				}
 			}
 		}
@@ -232,7 +232,7 @@ void	IRC::part_for_each(std::string name, int cs, std::string answer){
 	}
 }
 
-void	IRC::topic(std::vector<std::string> cmd, int cs) {
+void	Server::topic(std::vector<std::string> cmd, int cs) {
 	std::vector<std::string> chn = this->fds[cs].get_channels();
 	size_t i = 0;
 	std::string answer;
@@ -253,7 +253,7 @@ void	IRC::topic(std::vector<std::string> cmd, int cs) {
 		}
 		else {
 			answer = ":" + this->fds[cs].get_nick() + "!" + this->fds[cs].get_user() + this->host + " TOPIC " + cmd[1] + " :" + this->channels[fd].get_topic() + "\n";
-			this->answer_to_client(cs, (char *)answer.c_str());
+			this->server_answering(cs, (char *)answer.c_str());
 		}
 		return ;
 	}
@@ -270,7 +270,7 @@ void	IRC::topic(std::vector<std::string> cmd, int cs) {
 	
 }
 
-void	IRC::quit(std::vector<std::string> cmd, int cs) {
+void	Server::quit(std::vector<std::string> cmd, int cs) {
 	std::string answer;
 	std::vector<std::string> channels;
 
@@ -290,7 +290,7 @@ void	IRC::quit(std::vector<std::string> cmd, int cs) {
 	close(cs);
 }
 
-void	IRC::accept_file(std::vector<std::string> cmd){
+void	Server::accept_file(std::vector<std::string> cmd){
 	std::cout << "accept_file!\n";
 	std::string name = "";
 	size_t i = 4;
@@ -312,7 +312,7 @@ void	IRC::accept_file(std::vector<std::string> cmd){
 	accept_write(name, atoi(cmd[i + 2].c_str()));
 }
 
-void	IRC::accept_write(std::string name, int port){
+void	Server::accept_write(std::string name, int port){
 	int			s;
 	struct sockaddr_in	sin;
 
@@ -327,7 +327,7 @@ void	IRC::accept_write(std::string name, int port){
 	close(s);
 }
 
-void	IRC::kick(std::vector<std::string> cmd, int cs) {
+void	Server::kick(std::vector<std::string> cmd, int cs) {
 	std::vector<std::string> chn = this->fds[cs].get_channels();
 	size_t i = 0;
 	std::string answer;
@@ -357,7 +357,7 @@ void	IRC::kick(std::vector<std::string> cmd, int cs) {
 	
 }
 
-void IRC::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::string name){
+void Server::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::string name){
 	std::vector<int> users;
 	size_t i = 0;
 
@@ -378,10 +378,10 @@ void IRC::kick_name(int cs, std::vector<std::string> cmd, int fd_chn, std::strin
 	else
 		answer += strjoin(cmd, " ", 3, cmd.size());
 	answer.append("\n");
-	answer_to_client(users[i], (char *)answer.c_str());
+	server_answering(users[i], (char *)answer.c_str());
 
 	users = this->channels[fd_chn].get_users();
 	for (size_t i = 0; i < users.size(); i++) {
-		answer_to_client(users[i], (char *)answer.c_str());
+		server_answering(users[i], (char *)answer.c_str());
 	}
 }

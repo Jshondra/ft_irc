@@ -1,6 +1,6 @@
 NAME		=	ircserv
 
-SRC			=	main	IRC		Client	IRC_cmd	Channels	\
+SRC			=	main	Server	Client	Server_cmd	Channels	\
 				privmsg		request		utils	away	auth	\
 				response
 
@@ -12,7 +12,7 @@ CC			=	c++
 
 FLAGS		=	-Wall -Wextra -Werror -std=c++98 -I includes/
 
-HEADER		=	includes/IRC.hpp includes/Client.hpp includes/Channels.hpp
+HEADER		=	includes/Server.hpp includes/Client.hpp includes/Channels.hpp
 
 .cpp.o		:
 			c++ $(FLAGS) -c $< -o ${<:.cpp=.o}

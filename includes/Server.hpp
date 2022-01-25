@@ -1,6 +1,6 @@
 #pragma once
-#ifndef IRC_HPP
-# define IRC_HPP
+#ifndef SERVER_HPP
+# define SERVER_HPP
 
 # include  <iostream>
 # include "Client.hpp"
@@ -18,10 +18,10 @@
 
 # define MAX_CLIENT 120
 # define MAX_CHANNELS 10
-# define SERVERNAME	"IRC_bro"
+# define SERVERNAME	"Server_bro"
 # define MAX(a,b)	((a > b) ? a : b)
 
-class IRC {
+class Server {
 	private:
 		class Client	*fds;
 		class Channels	*channels;
@@ -33,16 +33,16 @@ class IRC {
 		in_addr_t		hostname;
 		std::string 	irc_pass;
 		std::string		servername;
-		std::map<std::string, void (IRC::*)(std::vector<std::string> cmd, int cs)>	commands;
+		std::map<std::string, void (Server::*)(std::vector<std::string> cmd, int cs)>	commands;
 		
-		IRC();
+		Server();
 
-		void	srv_create();
-		void	init_cmds();
-		void	client_reading(int i);
-		void	client_writing(int i);
-		void	authorization(int cs);
-		void	answer_to_client(int cs, char *str);
+		void	creation_server(); //creation_server
+		void	all_commands(); //init_cmds
+		void	read_by_client(int i); //client_reading
+		void	write_by_client(int i); //client writing
+		void	make_auth(int cs); //authorization
+		void	server_answering(int cs, char *str); //answer_to_client
 		void	answer_server(int cs, int num, std::string nick, std::string cmd);
 		void	after_join(int cs, int chn);
 		void	join_participants(int cs, int chn);
@@ -62,11 +62,11 @@ class IRC {
 		fd_set	fd_read;
 		fd_set	fd_write;
 
-		IRC(std::string host, int port, std::string pass);
-		IRC(const IRC &irc);
-		~IRC(void);
+		Server(std::string host, int port, std::string pass);
+		Server(const Server &irc);
+		~Server(void);
 
-		IRC&	operator=(const IRC &irc);
+		Server&	operator=(const Server &irc);
 
 		void	init_fd();
 		void	do_select();
@@ -106,9 +106,9 @@ class IRC {
 		
 };
 
-void		srv_accept(IRC *irc, int s);
-void		client_read(IRC *irc, int cs);
-void		client_write(IRC *irc, int cs);
+void		srv_accept(Server *irc, int s);
+void		client_read(Server *irc, int cs);
+void		client_write(Server *irc, int cs);
 std::string	strjoin(std::vector<std::string> vector, const std::string& delim, int start, int end);
 std::vector<std::string>	split(const std::string& str, const std::string& sep);
 std::string	get_text(int cs);

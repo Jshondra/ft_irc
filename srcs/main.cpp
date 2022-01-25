@@ -1,4 +1,4 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 #include "../includes/Client.hpp"
 
 bool	g_run;
@@ -11,7 +11,7 @@ void	handler(int sig)
 
 void start_server(std::string host, int port, std::string pass)
 {
-	IRC irc(host, port, pass);
+	Server irc(host, port, pass);
 	
 	g_run = true;
 	signal(SIGINT, handler);

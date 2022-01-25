@@ -1,6 +1,6 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
-void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) 
+void Server::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) 
 {
 	std::string answer;
 	std::string message;
@@ -18,15 +18,15 @@ void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::st
 	away_message = this->fds[client_fd].get_away();
 	message = strjoin(cmd, " ", 2, cmd.size());
 	answer = ":" + sender + " " + cmd.front() + " " + recipient + " :" + message + '\n';
-	answer_to_client(client_fd, (char *)answer.c_str());
+	server_answering(client_fd, (char *)answer.c_str());
 	if (!away_message.empty() && cmd.front() != "NOTICE")
 	{
 		answer = ":" + recipient + " PRIVMSG " + sender + " :" + away_message + '\n';
-		answer_to_client(cs, (char *)answer.c_str());
+		server_answering(cs, (char *)answer.c_str());
 	}
 }
 
-void IRC::send_channels(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) {
+void Server::send_channels(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) {
 	std::string answer;
 	std::string message;
 
@@ -36,10 +36,10 @@ void IRC::send_channels(std::vector<std::string> cmd, int client_fd, int cs, std
 	std::vector<int> users = this->channels[client_fd].get_users();
 	for (size_t i = 0; i < users.size(); ++i)
 		if (users[i] != cs)
-			answer_to_client(users[i], (char *) answer.c_str());
+			server_answering(users[i], (char *) answer.c_str());
 }
 
-void	IRC::privmsg_notice(std::vector<std::string> cmd, int cs)
+void	Server::privmsg_notice(std::vector<std::string> cmd, int cs)
 {
 	int			client_fd;
 	std::string sender;

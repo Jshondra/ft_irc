@@ -1,26 +1,26 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
-IRC::IRC(std::string host, int port, std::string pass) {
+Server::Server(std::string host, int port, std::string pass) {
 	maxfd = MAX_CLIENT;
 	fds = new Client[maxfd];
 	channels = new Channels[MAX_CHANNELS];
 	this->port = port;
 	this->irc_pass = pass;
 	this->host = host;
-	srv_create();
-	init_cmds();
+	creation_server();
+	all_commands();
 }
 
-IRC::IRC(const IRC &irc) {
+Server::Server(const Server &irc) {
 	*this = irc;
 }
 
-IRC::~IRC(void) {
+Server::~Server(void) {
 	delete[] fds;
 	delete[] channels;
 }
 
-IRC&	IRC::operator=(const IRC &irc) {
+Server&	Server::operator=(const Server &irc) {
 	if (this != &irc){
 		maxfd = irc.maxfd;
 		fds = irc.fds;
@@ -28,7 +28,7 @@ IRC&	IRC::operator=(const IRC &irc) {
 	return (*this);
 }
 
-void	IRC::srv_create(void) {
+void	Server::creation_server(void) {
 	struct sockaddr_in	sin;
 
 	this->sock = socket(PF_INET, SOCK_STREAM, 0);
@@ -63,7 +63,7 @@ void	IRC::srv_create(void) {
 	this->fds[this->sock].set_fct_read(srv_accept);
 }
 
-void	srv_accept(IRC *irc, int s) {
+void	srv_accept(Server *irc, int s) {
 	int					cs;
 	struct sockaddr_in	csin;
 	socklen_t			csin_len;
@@ -78,42 +78,42 @@ void	srv_accept(IRC *irc, int s) {
 	}
 }
 
-void	IRC::clean_read_buf(int cs) {
+void	Server::clean_read_buf(int cs) {
 	fds[cs].clean_buf_read();
 }
 
-char*	IRC::get_read_buf(int cs) {
+char*	Server::get_read_buf(int cs) {
 	return fds[cs].get_buf_read();
 }
 
-char*	IRC::get_write_buf(int cs) {
+char*	Server::get_write_buf(int cs) {
 	return fds[cs].get_buf_write();
 }
 
-void	client_write(IRC *irc, int cs){
+void	client_write(Server *irc, int cs){
 	(void)cs;
 	(void)irc;
 }
 
-int		IRC::get_maxfd() {
+int		Server::get_maxfd() {
 	return this->maxfd;
 }
 
-int		IRC::get_type_client(int cs){
+int		Server::get_type_client(int cs){
 	return this->fds[cs].get_type();
 }
 
-void	IRC::add_client(int cs){
+void	Server::add_client(int cs){
 	this->fds[cs].set_type(FD_CLIENT);
 	this->fds[cs].set_fct_read(client_read);
 	this->fds[cs].set_fct_write(client_write);
 }
 
-void	IRC::delete_client(int cs) {
+void	Server::delete_client(int cs) {
 	this->fds[cs].clean_client();
 }
 
-void	IRC::init_fd() {
+void	Server::init_fd() {
 	int	i;
 
 	i = 0;
@@ -132,56 +132,56 @@ void	IRC::init_fd() {
 	}
 }
 
-void	IRC::do_select() {
+void	Server::do_select() {
 	this->r = select(this->max + 1, &this->fd_read, &this->fd_write, nullptr, nullptr);
 }
 
-void	IRC::check_fd() {
+void	Server::check_fd() {
 	int	i;
 
 	i = 0;
 	while ((i < this->maxfd) && (this->r > 0)){
 		if (FD_ISSET(i, &this->fd_read))
-			this->client_reading(i);
+			this->read_by_client(i);
 		if (FD_ISSET(i, &this->fd_write))
-			this->client_writing(i);
+			this->write_by_client(i);
 		if (FD_ISSET(i, &this->fd_read) || FD_ISSET(i, &this->fd_write))
 			this->r--;
 		i++;
 	}
 }
 
-void	IRC::client_reading(int i){
+void	Server::read_by_client(int i){
 	this->fds[i].ex_read(this, i);
 }
 
-void	IRC::client_writing(int i){
+void	Server::write_by_client(int i){
 	this->fds[i].ex_write(this, i);
 }
 
-void IRC::init_cmds()
+void Server::all_commands()
 {
-	this->commands["NICK"] = &IRC::nick;
-	this->commands["USER"] = &IRC::user;
-	this->commands["PASS"] = &IRC::pass;
-	this->commands["PRIVMSG"] = &IRC::privmsg_notice;
-	this->commands["NOTICE"] = &IRC::privmsg_notice;
-	this->commands["ISON"] = &IRC::ison;
-	this->commands["PING"] = &IRC::ping;
-	this->commands["JOIN"] = &IRC::join;
-	this->commands["WHO"] = &IRC::who;
-	this->commands["WHOIS"] = &IRC::whois;
-	this->commands["PART"] = &IRC::part;
-	this->commands["AWAY"] = &IRC::away;
-	this->commands["NAMES"] = &IRC::names;
-	this->commands["TOPIC"] = &IRC::topic;
-	this->commands["QUIT"] = &IRC::quit;
-	this->commands["KICK"] = &IRC::kick;
+	this->commands["NICK"] = &Server::nick;
+	this->commands["USER"] = &Server::user;
+	this->commands["PASS"] = &Server::pass;
+	this->commands["PRIVMSG"] = &Server::privmsg_notice;
+	this->commands["NOTICE"] = &Server::privmsg_notice;
+	this->commands["ISON"] = &Server::ison;
+	this->commands["PING"] = &Server::ping;
+	this->commands["JOIN"] = &Server::join;
+	this->commands["WHO"] = &Server::who;
+	this->commands["WHOIS"] = &Server::whois;
+	this->commands["PART"] = &Server::part;
+	this->commands["AWAY"] = &Server::away;
+	this->commands["NAMES"] = &Server::names;
+	this->commands["TOPIC"] = &Server::topic;
+	this->commands["QUIT"] = &Server::quit;
+	this->commands["KICK"] = &Server::kick;
 }
 
-void	IRC::choose_cmd(std::vector<std::string> cmd, int cs)
+void	Server::choose_cmd(std::vector<std::string> cmd, int cs)
 {
-	std::map<std::string, void (IRC::*)(std::vector<std::string> cmd, int cs)>::iterator found;
+	std::map<std::string, void (Server::*)(std::vector<std::string> cmd, int cs)>::iterator found;
     found = this->commands.find(cmd.front());
 	if (found != commands.end())
 	{
@@ -205,7 +205,7 @@ void	IRC::choose_cmd(std::vector<std::string> cmd, int cs)
 }
 
 
-int		IRC::get_fd(const std::string& nick) {
+int		Server::get_fd(const std::string& nick) {
 	for (int i = 4; i != this->get_maxfd(); ++i)
 	{
 		if (nick == this->fds[i].get_nick())
@@ -214,7 +214,7 @@ int		IRC::get_fd(const std::string& nick) {
 	return -1;
 }
 
-bool	IRC::check_run(bool run) {
+bool	Server::check_run(bool run) {
 	if (run)
 		return true;
 	for (int fd = 3; fd < this->maxfd; ++fd)
@@ -230,6 +230,6 @@ bool	IRC::check_run(bool run) {
 	exit(130);
 }
 
-IRC::IRC() {
+Server::Server() {
 }
  

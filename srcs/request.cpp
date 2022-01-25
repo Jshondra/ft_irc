@@ -1,4 +1,4 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
 std::vector<std::string> parse_text(std::string text) {
 	std::vector<std::string> commands;
@@ -36,7 +36,7 @@ std::string	get_text(int cs) {
 	return text;
 }
 
-void	client_read(IRC *irc, int cs) {
+void	client_read(Server *irc, int cs) {
 	std::string text;
 	std::vector<std::string> cmd;
 	std::vector<std::string> commands;

@@ -1,4 +1,4 @@
-#include "../includes/IRC.hpp"
+#include "../includes/Server.hpp"
 
 std::string strjoin(std::vector<std::string> vector, const std::string& delim, int start, int end) {
 	std::string	result;
