@@ -1,6 +1,6 @@
 #include "../includes/IRC.hpp"
 
-bool IRC::replay_nick(const std::string& nick) {
+bool IRC::nickname_repl(const std::string& nick) {
 	for (int i = 4; i != this->maxfd; ++i)
 	{
 		if (this->fds[i].getNickname() == nick)
@@ -9,7 +9,7 @@ bool IRC::replay_nick(const std::string& nick) {
 	return false;
 }
 
-bool IRC::check_nick(const std::string& nick) {
+bool IRC::nickname_checker(const std::string& nick) {
 	for (size_t i = 0; i != nick.size(); ++i)
 	{
 		if (!isalnum(nick[i]))
@@ -18,21 +18,21 @@ bool IRC::check_nick(const std::string& nick) {
 	return false;
 }
 
-void	IRC::nick(std::vector<std::string> cmd, int cs)
+void	IRC::nick_cmd(std::vector<std::string> cmd, int cs)
 {
 	std::string	nick;
 	
 	nick = cmd[1];
-	if (replay_nick(nick)) {
+	if (nickname_repl(nick)) {
 		answer_server(cs, 433, nick, "");
 		return ;
 	}
-	if (check_nick(nick)) {
+	if (nickname_checker(nick)) {
 		answer_server(cs, 432, nick, "");
 		return ;
 	}
 	if (this->fds[cs].getAuth()) {
-		change_nick(nick , cs);
+		nickname_changer(nick , cs);
 		return ;
 	}
 	this->fds[cs].setNickname(nick);
@@ -40,7 +40,7 @@ void	IRC::nick(std::vector<std::string> cmd, int cs)
 		this->authorization(cs);
 }
 
-void	IRC::change_nick(std::string nick, int cs){
+void	IRC::nickname_changer(std::string nick, int cs){
 	std::string answer;
 	std::vector<std::string> channels;
 	std::vector<int> chnl_clients;
@@ -59,7 +59,7 @@ void	IRC::change_nick(std::string nick, int cs){
 }
 
 
-void	IRC::user(std::vector<std::string> cmd, int cs)
+void	IRC::user_cmd(std::vector<std::string> cmd, int cs)
 {
 	std::string realname;
 
@@ -67,7 +67,7 @@ void	IRC::user(std::vector<std::string> cmd, int cs)
 		answer_server(cs, 461, this->fds[cs].getNickname(), cmd[0]);
 		return ;
 	}
-	realname = strjoin(cmd, " ", 4, cmd.size());
+	realname = strjoin_cmd(cmd, " ", 4, cmd.size());
 	if (realname.front() == ':')
 		realname.erase(0, 1);
 	this->fds[cs].setRealname(realname);
@@ -76,7 +76,7 @@ void	IRC::user(std::vector<std::string> cmd, int cs)
 		this->authorization(cs);
 }
 
-void	IRC::pass(std::vector<std::string> cmd, int cs)
+void	IRC::pass_cmd(std::vector<std::string> cmd, int cs)
 {
 	std::string	pass;
 	
@@ -85,7 +85,7 @@ void	IRC::pass(std::vector<std::string> cmd, int cs)
 	this->fds[cs].setPassword(cmd[1]);
 }
 
-void IRC::motd(int cs, std::string nick) {
+void IRC::method(int cs, std::string nick) {
 	std::string message = ":" + this->servername + " 372 " + nick;
 	answer_to_client(cs, (char *)(":" + this->servername + " 375 " + nick + " :- " + this->servername +
 			" Message of the day -\n").c_str());
@@ -102,18 +102,18 @@ void IRC::motd(int cs, std::string nick) {
 	answer_to_client(cs, (char *)(message + " :- ⣿⣿⣿⣿⣿⣿⣿⡐⠐⠄⠄⣠⣀⣀⣚⣯⣵⣶⠆⣰⠄⠞⣾⣿⣿⣿⣿⣿⣿\n").c_str());
 	answer_to_client(cs, (char *)(message + " :- ⣿⠿⠿⠋⠉⠄⠄⠄⠄⠄⠄⠄⣀⣠⣾⣿⣿⣿⡟⠁⠹⡇⣸⣿⣿⣿⣿⣿⣿\n").c_str());
 	answer_to_client(cs, (char *)(message + " :- ⠁⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠙⠿⠿⠛⠋⠄⣸⣦⣠⣿⣿⣿⣿⣿⣿⣿\n").c_str());
-	answer_to_client(cs, (char *)(":" + this->servername + " 376 " + nick + " :End of /MOTD command\n").c_str());
+	answer_to_client(cs, (char *)(":" + this->servername + " 376 " + nick + " :End of /method command\n").c_str());
 }
 
 void	IRC::authorization(int cs){
 	if (this->fds[cs].getPassword() != this->irc_pass){
 		close(cs);
-		this->delete_client(cs);
+		this->client_drop(cs);
 		std::cout << "Client " << cs << " gone  away\n";
 	}
 	else {
 		this->fds[cs].setAuth(true);
 		this->fds[cs].setRegTime(time(0));
-		motd(cs, this->fds[cs].getNickname());
+		method(cs, this->fds[cs].getNickname());
 	}
 }

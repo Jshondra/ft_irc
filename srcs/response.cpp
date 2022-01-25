@@ -69,6 +69,6 @@ void	IRC::answer_server(int cs, int num, std::string nick, std::string cmd){
 }
 
 void	IRC::answer_to_client(int cs, char *str) {
-	// std::cout << "Answer to " << this->fds[cs].get_nick() << ":!\n" << str << std::endl;
+	// std::cout << "Answer to " << this->fds[cs].get_nick_cmd() << ":!\n" << str << std::endl;
 	send(cs, str, strlen(str), SO_NOSIGPIPE);
 }

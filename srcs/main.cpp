@@ -15,11 +15,11 @@ void start_server(std::string host, int port, std::string pass)
 	
 	g_run = true;
 	signal(SIGINT, handler);
-	while (irc.check_run(g_run))
+	while (irc.run_checker(g_run))
 	{
-		irc.init_fd();
-		irc.do_select();
-		irc.check_fd();
+		irc.fd_make();
+		irc.select_to_do();
+		irc.fd_checker();
 	}
 }
 

@@ -60,10 +60,10 @@ void	IRC::srv_create(void) {
 	}
 	fcntl(this->sock, F_SETFL, O_NONBLOCK);
 	this->fds[this->sock].setFdValue(FD_SERV);
-	this->fds[this->sock].setFctRead(srv_accept);
+	this->fds[this->sock].setFctRead(server_accepter);
 }
 
-void	srv_accept(IRC *irc, int s) {
+void	server_accepter(IRC *irc, int s) {
 	int					cs;
 	struct sockaddr_in	csin;
 	socklen_t			csin_len;
@@ -74,7 +74,7 @@ void	srv_accept(IRC *irc, int s) {
 		close(cs);
 	else {
 		std::cout << "New client " << cs << " from " << inet_ntoa(csin.sin_addr) << ":" << ntohs(csin.sin_port) << std::endl;
-		irc->add_client(cs);
+		irc->client_adder(cs);
 	}
 }
 
@@ -90,7 +90,7 @@ char*	IRC::get_write_buf(int cs) {
 	return fds[cs].getBufWrite();
 }
 
-void	client_write(IRC *irc, int cs){
+void	writer_client(IRC *irc, int cs){
 	(void)cs;
 	(void)irc;
 }
@@ -103,17 +103,17 @@ int		IRC::getFdValue_client(int cs){
 	return this->fds[cs].getFdValue();
 }
 
-void	IRC::add_client(int cs){
+void	IRC::client_adder(int cs){
 	this->fds[cs].setFdValue(FD_CLIENT);
-	this->fds[cs].setFctRead(client_read);
-	this->fds[cs].setFctWrite(client_write);
+	this->fds[cs].setFctRead(reader_client);
+	this->fds[cs].setFctWrite(writer_client);
 }
 
-void	IRC::delete_client(int cs) {
+void	IRC::client_drop(int cs) {
 	this->fds[cs].cleanClient();
 }
 
-void	IRC::init_fd() {
+void	IRC::fd_make() {
 	int	i;
 
 	i = 0;
@@ -132,17 +132,17 @@ void	IRC::init_fd() {
 	}
 }
 
-void	IRC::do_select() {
+void	IRC::select_to_do() {
 	this->r = select(this->max + 1, &this->fd_read, &this->fd_write, nullptr, nullptr);
 }
 
-void	IRC::check_fd() {
+void	IRC::fd_checker() {
 	int	i;
 
 	i = 0;
 	while ((i < this->maxfd) && (this->r > 0)){
 		if (FD_ISSET(i, &this->fd_read))
-			this->client_reading(i);
+			this->reader_clienting(i);
 		if (FD_ISSET(i, &this->fd_write))
 			this->client_writing(i);
 		if (FD_ISSET(i, &this->fd_read) || FD_ISSET(i, &this->fd_write))
@@ -151,7 +151,7 @@ void	IRC::check_fd() {
 	}
 }
 
-void	IRC::client_reading(int i){
+void	IRC::reader_clienting(int i){
 	this->fds[i].exRead(this, i);
 }
 
@@ -161,25 +161,25 @@ void	IRC::client_writing(int i){
 
 void IRC::init_cmds()
 {
-	this->commands["NICK"] = &IRC::nick;
-	this->commands["USER"] = &IRC::user;
-	this->commands["PASS"] = &IRC::pass;
-	this->commands["PRIVMSG"] = &IRC::privmsg_notice;
-	this->commands["NOTICE"] = &IRC::privmsg_notice;
-	this->commands["ISON"] = &IRC::ison;
-	this->commands["PING"] = &IRC::ping;
-	this->commands["JOIN"] = &IRC::join;
-	this->commands["WHO"] = &IRC::who;
-	this->commands["WHOIS"] = &IRC::whois;
-	this->commands["PART"] = &IRC::part;
-	this->commands["AWAY"] = &IRC::away;
-	this->commands["NAMES"] = &IRC::names;
-	this->commands["TOPIC"] = &IRC::topic;
-	this->commands["QUIT"] = &IRC::quit;
-	this->commands["KICK"] = &IRC::kick;
+	this->commands["NICK"] = &IRC::nick_cmd;
+	this->commands["USER"] = &IRC::user_cmd;
+	this->commands["PASS"] = &IRC::pass_cmd;
+	this->commands["PRIVMSG"] = &IRC::privmsg_cmd;
+	this->commands["NOTICE"] = &IRC::ison_cmd;
+	this->commands["ISON"] = &IRC::ison_cmd;
+	this->commands["PING"] = &IRC::ping_cmd;
+	this->commands["JOIN"] = &IRC::join_cmd;
+	this->commands["WHO"] = &IRC::who_cmd;
+	this->commands["WHOIS"] = &IRC::whois_cmd;
+	this->commands["PART"] = &IRC::part_cmd;
+	this->commands["AWAY"] = &IRC::away_cmd;
+	this->commands["NAMES"] = &IRC::names_cmd;
+	this->commands["TOPIC"] = &IRC::topic_cmd;
+	this->commands["QUIT"] = &IRC::quit_cmd;
+	this->commands["KICK"] = &IRC::kick_cmd;
 }
 
-void	IRC::choose_cmd(std::vector<std::string> cmd, int cs)
+void	IRC::command_case(std::vector<std::string> cmd, int cs)
 {
 	std::map<std::string, void (IRC::*)(std::vector<std::string> cmd, int cs)>::iterator found;
     found = this->commands.find(cmd.front());
@@ -214,12 +214,12 @@ int		IRC::get_fd(const std::string& nick) {
 	return -1;
 }
 
-bool	IRC::check_run(bool run) {
+bool	IRC::run_checker(bool run) {
 	if (run)
 		return true;
 	for (int fd = 3; fd < this->maxfd; ++fd)
 	{
-		delete_client(fd);
+		client_drop(fd);
 		close(fd);
 	}
 	linger opt;

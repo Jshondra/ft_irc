@@ -55,7 +55,7 @@ class Client {
 		std::string	getNickname(void);
 		std::string	getUsername(void);
 		std::string	getPassword(void);
-		std::string	getAway(void);
+		std::string	getaway_cmd(void);
 		std::string	getRealname(void);
 		bool		getAuth(void);
 		time_t		getRegTime(void);
@@ -67,7 +67,7 @@ class Client {
 		void		setFdValue(int);
 		void		setAuth(bool auth);
 		void		setNickname(std::string name);
-		void		setAway(std::string message);
+		void		setaway_cmd(std::string message);
 		void		setFctRead(void (*fct_read)(IRC *irc, int s));
 		void		setFctWrite(void (*fct_write)(IRC *irc, int s));
 		void		setRegTime(time_t reg);

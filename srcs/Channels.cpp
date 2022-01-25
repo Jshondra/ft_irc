@@ -99,10 +99,10 @@ void				Channels::setPassword(std::string password){
 	this->password = password;
 }
 
-void	Channels::set_topic(std::string topic){
+void	Channels::set_topic_cmd(std::string topic){
 	this->topic = topic;
 }
 
-std::string	Channels::get_topic(void){
+std::string	Channels::get_topic_cmd(void){
 	return this->topic;
 }

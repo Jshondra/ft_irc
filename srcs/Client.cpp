@@ -152,11 +152,11 @@ void		Client::setRegTime(time_t reg){
 	this->reg_time = reg;
 }
 
-std::string		Client::getAway(void) {
+std::string		Client::getaway_cmd(void) {
 	return this->away_message;
 }
 
-void		Client::setAway(std::string message) {
+void		Client::setaway_cmd(std::string message) {
 	this->away_message = message;
 }
 

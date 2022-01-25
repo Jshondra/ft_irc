@@ -33,8 +33,8 @@ class Channels {
 		void				setPassword(std::string password);
 		void				set_name_channel(std::string name_chat);
 		int					leaving_particimant(int cs);
-		void				set_topic(std::string topic);
-		std::string			get_topic(void);
+		void				set_topic_cmd(std::string topic);
+		std::string			get_topic_cmd(void);
 };
 
 #endif

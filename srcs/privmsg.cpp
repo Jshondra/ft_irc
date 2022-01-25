@@ -1,6 +1,6 @@
 #include "../includes/IRC.hpp"
 
-void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) 
+void IRC::user_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) 
 {
 	std::string answer;
 	std::string message;
@@ -13,10 +13,10 @@ void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::st
 	}
 	//senf_file
 	// if (cmd.size() > 3 && (int)cmd[2].c_str()[1] == 1)
-	// 	accept_file(cmd);
+	// 	file_accepter(cmd);
 	//send_fule_end
-	away_message = this->fds[client_fd].getAway();
-	message = strjoin(cmd, " ", 2, cmd.size());
+	away_message = this->fds[client_fd].getaway_cmd();
+	message = strjoin_cmd(cmd, " ", 2, cmd.size());
 	answer = ":" + sender + " " + cmd.front() + " " + recipient + " :" + message + '\n';
 	answer_to_client(client_fd, (char *)answer.c_str());
 	if (!away_message.empty() && cmd.front() != "NOTICE")
@@ -26,11 +26,11 @@ void IRC::send_user(std::vector<std::string> cmd, int client_fd, int cs, std::st
 	}
 }
 
-void IRC::send_channels(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) {
+void IRC::channel_sender(std::vector<std::string> cmd, int client_fd, int cs, std::string sender, std::string recipient) {
 	std::string answer;
 	std::string message;
 
-	message = strjoin(cmd, " ", 2, cmd.size());
+	message = strjoin_cmd(cmd, " ", 2, cmd.size());
 	answer = ":" + sender + "!" + this->fds[cs].getUsername() + "@" + this->host + " PRIVMSG " + recipient + " :" +
 			message + '\n';
 	std::vector<int> users = this->channels[client_fd].get_users();
@@ -39,7 +39,7 @@ void IRC::send_channels(std::vector<std::string> cmd, int client_fd, int cs, std
 			answer_to_client(users[i], (char *) answer.c_str());
 }
 
-void	IRC::privmsg_notice(std::vector<std::string> cmd, int cs)
+void	IRC::privmsg_cmd(std::vector<std::string> cmd, int cs)
 {
 	int			client_fd;
 	std::string sender;
@@ -59,7 +59,7 @@ void	IRC::privmsg_notice(std::vector<std::string> cmd, int cs)
 	if (client_fd < 0)
 		answer_server(cs, 401, sender, recipient);
 	else if (recipient.front() != '#' && recipient.front() != '&')
-		send_user(cmd, client_fd, cs, sender, recipient);
+		user_sender(cmd, client_fd, cs, sender, recipient);
 	else
-		send_channels(cmd, client_fd, cs, sender, recipient);
+		channel_sender(cmd, client_fd, cs, sender, recipient);
 }

@@ -21,7 +21,7 @@ std::vector<std::string> parse_text(std::string text) {
 	return commands;
 }
 
-std::string	get_text(int cs) {
+std::string	getter_clean_txt(int cs) {
 	std::string text;
 	char buffer[103];
 	ssize_t ret;
@@ -36,23 +36,23 @@ std::string	get_text(int cs) {
 	return text;
 }
 
-void	client_read(IRC *irc, int cs) {
+void	reader_client(IRC *irc, int cs) {
 	std::string text;
 	std::vector<std::string> cmd;
 	std::vector<std::string> commands;
 
-	text = get_text(cs);
+	text = getter_clean_txt(cs);
 	std::cout << "Client #" << cs << ": " << std::endl << text;
 	if (text.size() < 1)
-		irc->choose_cmd(split("QUIT :the client on the other end of the link died", " "), cs);
+		irc->command_case(our_own_split("QUIT :the client on the other end of the link died", " "), cs);
 	else if (text.back() == '\n' && text.size() > 1)
 		commands = parse_text(text);
 	for (size_t i = 0; i < commands.size(); ++i)
 	{
-		cmd = split(commands[i], " ");
+		cmd = our_own_split(commands[i], " ");
 		if (cmd.size() >= 3 && cmd[2].front() == ':')
 			 cmd[2].erase(0, 1);
-		irc->choose_cmd(cmd, cs);
+		irc->command_case(cmd, cs);
 		cmd.clear();
 	}
 }
