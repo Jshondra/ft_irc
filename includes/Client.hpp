@@ -27,7 +27,7 @@ class Client {
 		std::string	password;
 		std::string	realname;
 		std::string away_message;
-		std::vector<std::string> channels;
+		std::vector<std::string> all_chns;
 		bool		auth;
 
 	public:
@@ -37,8 +37,8 @@ class Client {
 
 		Client&	operator=(const Client &fd);
 
-		void		exRead(Server *irc, int cs);
-		void		exWrite(Server *irc, int cs);
+		void		exRead(Server *irc, int mc);
+		void		exWrite(Server *irc, int mc);
 		void		cleanClient(void);
 		void		cleanBufRead();
 		void		addChannel(std::string name);

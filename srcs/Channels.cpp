@@ -6,8 +6,8 @@ Channels::Channels(){
 
 Channels::~Channels(){}
 
-void	Channels::add_new_client(int cs){
-	this->clients.push_back(cs);
+void	Channels::add_new_client(int mc){
+	this->clients.push_back(mc);
 }
 
 void	Channels::clean_channel(void){
@@ -25,14 +25,14 @@ void	Channels::clean_channel(void){
 	this->topic = "";
 }
 
-void	Channels::add_moderator(int cs){
-	this->moderator.push_back(cs);
-	this->add_new_client(cs);
+void	Channels::add_moderator(int mc){
+	this->moderator.push_back(mc);
+	this->add_new_client(mc);
 }
 
-void	Channels::add_users(int cs){
-	this->users.push_back(cs);
-	this->add_new_client(cs);
+void	Channels::add_users(int mc){
+	this->users.push_back(mc);
+	this->add_new_client(mc);
 }
 
 std::vector<int>	Channels::getClients(void){
@@ -71,9 +71,9 @@ std::string	Channels::getTopic(void){
 	return this->topic;
 }
 
-int		Channels::leaving_particimant(int cs){
+int		Channels::leaving_particimant(int mc){
 	for (size_t i = 0; i < this->clients.size(); i++) {
-		if (this->clients[i] == cs){
+		if (this->clients[i] == mc){
 			this->clients.erase(this->clients.begin() + i);
 			break ;
 		}
@@ -86,13 +86,13 @@ int		Channels::leaving_particimant(int cs){
 		return -1;
 	}
 	for (size_t i = 0; i < this->users.size(); i++) {
-		if (this->users[i] == cs) {
+		if (this->users[i] == mc) {
 			this->users.erase(this->users.begin() + i);
 			return (0);
 		}
 	}
 	for (size_t i = 0; i < this->moderator.size(); i++) {
-		if (this->moderator[i] == cs) {
+		if (this->moderator[i] == mc) {
 			this->moderator.erase(this->moderator.begin() + i);
 			if (this->moderator.empty()) {
 				this->moderator.push_back(this->users[0]);

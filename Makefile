@@ -1,8 +1,8 @@
 NAME		=	ircserv
 
 SRC			=	main	Server	Client	Server_cmd	Channels	\
-				privmsg		request		utils	away	auth	\
-				response
+				privmsg		req_client	handler	authorization	\
+				resp_serv
 
 SRCS		=	$(addsuffix .cpp, $(addprefix srcs/, $(SRC)))
 

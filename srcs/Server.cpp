@@ -3,11 +3,11 @@
 # define OFF_COLOR "\033[0m"
 
 Server::Server(std::string host, int port, std::string pass) {
-	maxfd = MAX_CLIENT;
-	fds = new Client[maxfd];
-	channels = new Channels[MAX_CHANNELS];
+	fd_maximum = MAX_CLIENT;
+	file_descriptors = new Client[fd_maximum];
+	all_chns = new Channels[MAX_CHANNELS];
 	this->port = port;
-	this->irc_pass = pass;
+	this->password_server = pass;
 	this->host = host;
 	creation_server();
 	all_commands();
@@ -18,14 +18,14 @@ Server::Server(const Server &server) {
 }
 
 Server::~Server(void) {
-	delete[] fds;
-	delete[] channels;
+	delete[] file_descriptors;
+	delete[] all_chns;
 }
 
 Server&	Server::operator=(const Server &server) {
 	if (this != &server){
-		maxfd = server.maxfd;
-		fds = server.fds;
+		fd_maximum = server.fd_maximum;
+		file_descriptors = server.file_descriptors;
 	}
 	return (*this);
 }
@@ -33,180 +33,180 @@ Server&	Server::operator=(const Server &server) {
 void	Server::creation_server(void) {
 	struct sockaddr_in	sin;
 
-	this->sock = socket(PF_INET, SOCK_STREAM, 0);
-	if (this->sock == -1) {
+	this->sockets = socket(PF_INET, SOCK_STREAM, 0);
+	if (this->sockets == -1) {
 		std::cout << "\033[0;31mFailed to create socket. errno: " << errno << OFF_COLOR << std::endl;
 		exit (errno);
 	}
 	const int trueFlag = 1;
-	if (setsockopt(this->sock, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0) {
+	if (setsockopt(this->sockets, SOL_SOCKET, SO_REUSEADDR, &trueFlag, sizeof(int)) < 0) {
 		std::cout << "\033[0;31msetsockopt failed" << OFF_COLOR << std::endl;
 		exit(errno);
 	}
 	sin.sin_family = AF_INET;
-	this->servername = SERVERNAME;
+	this->server_name = SERVERNAME;
 	this->hostname = inet_addr((const char *)this->host.c_str());
 	sin.sin_addr.s_addr = this->hostname;
 	sin.sin_port = htons(this->port);
-	if (bind(this->sock, (struct sockaddr*)&sin, sizeof(sin)) == -1) {
+	if (bind(this->sockets, (struct sockaddr*)&sin, sizeof(sin)) == -1) {
 		std::cout << "\033[0;31mFailed to bind to port " << port << OFF_COLOR << std::endl;
 		exit(errno);
 	}
-	if (listen(this->sock, 21) == -1) {
+	if (listen(this->sockets, 21) == -1) {
 		std::cout << "\033[0;31mFailed to listen on socket \033[0m" << std::endl;
 		exit(104);
 	}
-	fcntl(this->sock, F_SETFL, O_NONBLOCK);
-	this->fds[this->sock].setFdValue(FD_SERV);
-	this->fds[this->sock].setFctRead(server_accepter);
+	fcntl(this->sockets, F_SETFL, O_NONBLOCK);
+	this->file_descriptors[this->sockets].setFdValue(FD_SERV);
+	this->file_descriptors[this->sockets].setFctRead(server_accepter);
 }
 
 void	server_accepter(Server *irc, int s) {
-	int					cs;
+	int					mc;
 	struct sockaddr_in	csin;
 	socklen_t			csin_len;
 
 	csin_len = sizeof(csin);
-	cs = accept(s, (struct sockaddr*)&csin, &csin_len);
-	if (cs > irc->get_maxfd())
-		close(cs);
+	mc = accept(s, (struct sockaddr*)&csin, &csin_len);
+	if (mc > irc->getFdMax())
+		close(mc);
 	else {
-		std::cout << "\033[0;32mNew client " << cs << " from " << inet_ntoa(csin.sin_addr) << ":" << ntohs(csin.sin_port) << " \033[0m" << std::endl;
-		irc->client_adder(cs);
+		std::cout << "\033[0;32mNew client " << mc << " from " << inet_ntoa(csin.sin_addr) << ":" << ntohs(csin.sin_port) << " \033[0m" << std::endl;
+		irc->client_adder(mc);
 	}
 }
 
-void	Server::clean_read_buf(int cs) {
-	fds[cs].cleanBufRead();
+void	Server::readCleanBuffer(int mc) {
+	file_descriptors[mc].cleanBufRead();
 }
 
-char*	Server::get_read_buf(int cs) {
-	return fds[cs].getBufRead();
+char*	Server::getBufferRead(int mc) {
+	return file_descriptors[mc].getBufRead();
 }
 
-char*	Server::get_write_buf(int cs) {
-	return fds[cs].getBufWrite();
+char*	Server::getBufferWrite(int mc) {
+	return file_descriptors[mc].getBufWrite();
 }
 
-void	writer_client(Server *irc, int cs){
-	(void)cs;
+void	writer_client(Server *irc, int mc){
+	(void)mc;
 	(void)irc;
 }
 
-int		Server::get_maxfd() {
-	return this->maxfd;
+int		Server::getFdMax() {
+	return this->fd_maximum;
 }
 
-int		Server::getFdValue_client(int cs){
-	return this->fds[cs].getFdValue();
+int		Server::getFdValue_client(int mc){
+	return this->file_descriptors[mc].getFdValue();
 }
 
-void	Server::client_adder(int cs){
-	this->fds[cs].setFdValue(FD_CLIENT);
-	this->fds[cs].setFctRead(reader_client);
-	this->fds[cs].setFctWrite(writer_client);
+void	Server::client_adder(int mc){
+	this->file_descriptors[mc].setFdValue(FD_CLIENT);
+	this->file_descriptors[mc].setFctRead(reader_client);
+	this->file_descriptors[mc].setFctWrite(writer_client);
 }
 
-void	Server::client_drop(int cs) {
-	this->fds[cs].cleanClient();
+void	Server::client_drop(int mc) {
+	this->file_descriptors[mc].cleanClient();
 }
 
 void	Server::fd_make() {
 	int	i;
 
 	i = 0;
-	this->max = 0;
-	FD_ZERO(&this->fd_read);
-	FD_ZERO(&this->fd_write);
-	while (i < this->get_maxfd()){
+	this->maximum = 0;
+	FD_ZERO(&this->readFd);
+	FD_ZERO(&this->writeFd);
+	while (i < this->getFdMax()){
 		if (this->getFdValue_client(i) != FD_FREE){
-			FD_SET(i, &this->fd_read);
+			FD_SET(i, &this->readFd);
 			
-			if (strlen(this->get_write_buf(i)) > 0)
-				FD_SET(i, &this->fd_write);
-			this->max = MAX(this->max, i);
+			if (strlen(this->getBufferWrite(i)) > 0)
+				FD_SET(i, &this->writeFd);
+			this->maximum = MAX(this->maximum, i);
 			}
 		i++;
 	}
 }
 
 void	Server::select_to_do() {
-	this->r = select(this->max + 1, &this->fd_read, &this->fd_write, nullptr, nullptr);
+	this->rack = select(this->maximum + 1, &this->readFd, &this->writeFd, nullptr, nullptr);
 }
 
 void	Server::fd_checker() {
 	int	i;
 
 	i = 0;
-	while ((i < this->maxfd) && (this->r > 0)){
-		if (FD_ISSET(i, &this->fd_read))
-			this->reader_clienting(i);
-		if (FD_ISSET(i, &this->fd_write))
-			this->client_writing(i);
-		if (FD_ISSET(i, &this->fd_read) || FD_ISSET(i, &this->fd_write))
-			this->r--;
+	while ((i < this->fd_maximum) && (this->rack > 0)){
+		if (FD_ISSET(i, &this->readFd))
+			this->clientIsReading(i);
+		if (FD_ISSET(i, &this->writeFd))
+			this->clientIsWriting(i);
+		if (FD_ISSET(i, &this->readFd) || FD_ISSET(i, &this->writeFd))
+			this->rack--;
 		i++;
 	}
 }
 
-void	Server::reader_clienting(int i){
-	this->fds[i].exRead(this, i);
+void	Server::clientIsReading(int i){
+	this->file_descriptors[i].exRead(this, i);
 }
 
-void	Server::client_writing(int i){
-	this->fds[i].exWrite(this, i);
+void	Server::clientIsWriting(int i){
+	this->file_descriptors[i].exWrite(this, i);
 }
 
 void Server::all_commands()
 {
-	this->commands["NICK"] = &Server::nick_cmd;
-	this->commands["USER"] = &Server::user_cmd;
-	this->commands["PASS"] = &Server::pass_cmd;
-	this->commands["PRIVMSG"] = &Server::privmsg_cmd;
-	this->commands["NOTICE"] = &Server::ison_cmd;
-	this->commands["ISON"] = &Server::ison_cmd;
-	this->commands["PING"] = &Server::ping_cmd;
-	this->commands["JOIN"] = &Server::join_cmd;
-	this->commands["WHO"] = &Server::who_cmd;
-	this->commands["WHOIS"] = &Server::whois_cmd;
-	this->commands["PART"] = &Server::part_cmd;
-	this->commands["AWAY"] = &Server::away_cmd;
-	this->commands["NAMES"] = &Server::names_cmd;
-	this->commands["TOPIC"] = &Server::topic_cmd;
-	this->commands["QUIT"] = &Server::quit_cmd;
-	this->commands["KICK"] = &Server::kick_cmd;
+	this->allCommands["NICK"] = &Server::nick_cmd;
+	this->allCommands["USER"] = &Server::user_cmd;
+	this->allCommands["PASS"] = &Server::pass_cmd;
+	this->allCommands["PRIVMSG"] = &Server::privmsg_cmd;
+	this->allCommands["NOTICE"] = &Server::ison_cmd;
+	this->allCommands["ISON"] = &Server::ison_cmd;
+	this->allCommands["PING"] = &Server::ping_cmd;
+	this->allCommands["JOIN"] = &Server::join_cmd;
+	this->allCommands["WHO"] = &Server::who_cmd;
+	this->allCommands["WHOIS"] = &Server::whois_cmd;
+	this->allCommands["PART"] = &Server::part_cmd;
+	this->allCommands["AWAY"] = &Server::away_cmd;
+	this->allCommands["NAMES"] = &Server::names_cmd;
+	this->allCommands["TOPIC"] = &Server::topic_cmd;
+	this->allCommands["QUIT"] = &Server::quit_cmd;
+	this->allCommands["KICK"] = &Server::kick_cmd;
 }
 
-void	Server::command_case(std::vector<std::string> cmd, int cs)
+void	Server::command_case(std::vector<std::string> cmd, int mc)
 {
-	std::map<std::string, void (Server::*)(std::vector<std::string> cmd, int cs)>::iterator found;
-    found = this->commands.find(cmd.front());
-	if (found != commands.end())
+	std::map<std::string, void (Server::*)(std::vector<std::string> cmd, int mc)>::iterator found;
+    found = this->allCommands.find(cmd.front());
+	if (found != allCommands.end())
 	{
 		if (cmd.size() == 1 && cmd.front() != "AWAY" && cmd.front() != "NAMES" && cmd.front() != "QUIT")
 		{
-			answer_server(cs, 461, this->fds[cs].getNickname(), cmd[0]);
+			answer_from_serv(mc, 461, this->file_descriptors[mc].getNickname(), cmd[0]);
 			return ;
 		}
-		if (cmd[0] == "NICK" || cmd[0] == "USER" || cmd[0] == "PASS" || cmd[0] == "QUIT" || this->fds[cs].getAuth()) {
-			(this->*(commands[(cmd[0])]))(cmd, cs);
+		if (cmd[0] == "NICK" || cmd[0] == "USER" || cmd[0] == "PASS" || cmd[0] == "QUIT" || this->file_descriptors[mc].getAuth()) {
+			(this->*(allCommands[(cmd[0])]))(cmd, mc);
 		}
 		else 
-			answer_server(cs, 451, "", "");
+			answer_from_serv(mc, 451, "", "");
 	}
 	else {
-		if (!this->fds[cs].getAuth())
-			answer_server(cs, 451, "", "");
+		if (!this->file_descriptors[mc].getAuth())
+			answer_from_serv(mc, 451, "", "");
 		else
-			answer_server(cs, 421, this->fds[cs].getNickname(), cmd.front());
+			answer_from_serv(mc, 421, this->file_descriptors[mc].getNickname(), cmd.front());
 	}
 }
 
 
-int		Server::get_fd(const std::string& nick) {
-	for (int i = 4; i != this->get_maxfd(); ++i)
+int		Server::getFd(const std::string& nick) {
+	for (int i = 4; i != this->getFdMax(); ++i)
 	{
-		if (nick == this->fds[i].getNickname())
+		if (nick == this->file_descriptors[i].getNickname())
 			return (i);
 	}
 	return -1;
@@ -215,7 +215,7 @@ int		Server::get_fd(const std::string& nick) {
 bool	Server::run_checker(bool run) {
 	if (run)
 		return true;
-	for (int fd = 3; fd < this->maxfd; ++fd)
+	for (int fd = 3; fd < this->fd_maximum; ++fd)
 	{
 		client_drop(fd);
 		close(fd);
@@ -223,8 +223,8 @@ bool	Server::run_checker(bool run) {
 	linger opt;
 	opt.l_onoff = 1;
 	opt.l_linger = 0;
-	setsockopt(this->sock, SOL_SOCKET, SO_LINGER, &opt, sizeof(opt));
-	close(this->sock);
+	setsockopt(this->sockets, SOL_SOCKET, SO_LINGER, &opt, sizeof(opt));
+	close(this->sockets);
 	exit(130);
 }
 

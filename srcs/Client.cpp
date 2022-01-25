@@ -29,8 +29,8 @@ void	Client::cleanClient(void) {
 	this->username = "";
 	this->auth = false;
 	this->away_message = "";
-	for (size_t i = 0; i < this->channels.size(); i++) {
-		this->channels.pop_back();
+	for (size_t i = 0; i < this->all_chns.size(); i++) {
+		this->all_chns.pop_back();
 	}
 }
 
@@ -62,11 +62,11 @@ int		Client::getFdValue(void) {
 	return this->fd_value;
 }
 
-void	Client::exRead(Server *irc, int cs) {
-	this->fct_read(irc, cs);
+void	Client::exRead(Server *irc, int mc) {
+	this->fct_read(irc, mc);
 }
-void	Client::exWrite(Server *irc, int cs) {
-	this->fct_write(irc, cs);
+void	Client::exWrite(Server *irc, int mc) {
+	this->fct_write(irc, mc);
 }
 
 void	Client::setNickname(std::string nickname) {
@@ -110,13 +110,13 @@ bool	Client::getAuth(void) {
 }
 
 void	Client::addChannel(std::string name) {
-	this->channels.push_back(name);
+	this->all_chns.push_back(name);
 }
 
 int	Client::deleteChannel(std::string name) {
-	for (size_t i = 0; i < this->channels.size(); i++) {
-		if (this->channels[i] == name) {
-			this->channels.erase(this->channels.begin() + i);
+	for (size_t i = 0; i < this->all_chns.size(); i++) {
+		if (this->all_chns[i] == name) {
+			this->all_chns.erase(this->all_chns.begin() + i);
 			return 0;
 		}
 	}
@@ -124,20 +124,20 @@ int	Client::deleteChannel(std::string name) {
 }
 
 std::vector<std::string> Client::getChannels(void){
-	return this->channels;
+	return this->all_chns;
 }
 
 std::string	Client::getChannelsStr(void) {
 	std::string ret;
 
 	ret = " :@";
-	for (size_t i = 0; i < this->channels.size(); i++) {
-		ret.append(this->channels[i]);
-		if (i + 1 != this->channels.size()) {
+	for (size_t i = 0; i < this->all_chns.size(); i++) {
+		ret.append(this->all_chns[i]);
+		if (i + 1 != this->all_chns.size()) {
 			ret.append(" ");
 		}
 	}
-	if (this->channels.size() == 0) {
+	if (this->all_chns.size() == 0) {
 		return (" :\n");
 	}
 	ret.append("\n");

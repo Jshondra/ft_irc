@@ -12,7 +12,7 @@ std::string strjoin_cmd(std::vector<std::string> vector, const std::string& deli
 
 std::vector<std::string> our_own_split(const std::string& str, const std::string& sep)
 {
-	std::vector<std::string> commands;
+	std::vector<std::string> allCommands;
 	std::string found;
 	std::size_t start;
 	std::size_t end;
@@ -24,7 +24,7 @@ std::vector<std::string> our_own_split(const std::string& str, const std::string
 		if (start != end)
 		{
 			found = str.substr(start, end - start);
-			commands.push_back(found);
+			allCommands.push_back(found);
 		}
 		start = end + sep.length();
 		end = str.find(sep, start);
@@ -33,9 +33,21 @@ std::vector<std::string> our_own_split(const std::string& str, const std::string
 	{
 		found = str.substr(start, end);
 		if (found.length() > 0)
-			commands.push_back(found);
+			allCommands.push_back(found);
 	}
 	else
-		commands.push_back(str);
-	return commands;
+		allCommands.push_back(str);
+	return allCommands;
+}
+
+void	Server::away_cmd(std::vector<std::string> cmd, int mc) {
+    std::string message;
+
+    if (cmd.size() == 1)
+        message = "";
+    else
+        message = strjoin_cmd(cmd, " ", 1, cmd.size());
+    if (message.front() == ':')
+		message.erase(0,1);
+    this->file_descriptors[mc].setaway_cmd(message);
 }
